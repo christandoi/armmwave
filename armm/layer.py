@@ -1,21 +1,24 @@
 """
-This module contains the attributes and methods of the `Layer` class.
-Each `Layer` has some physical properties that we need to access (and
-possibly update) throughout our calculations.
+This module contains the attributes and methods of the `BaseLayer` 
+class, as well as classes that derive from it. Each `BaseLayer` has some 
+physical properties that we need to access (and possibly update) 
+throughout our calculations.
 """
 
-class Layer:
+import numpy as np
+
+class BaseLayer:
     """
-    `Layer` docstring.
+    `BaseLayer` docstring.
     """
     def __init__(self):
         self.rind = 1.
         self.thick = 1. # Arbitrary non-zero thickness to avoid div(0) errors
         self.tand = 0.
-        self.desc = 'Generic layer'
+        self.desc = 'Basic layer'
 
     def __repr__(self):
-        return '{} (Generic layer)'.format(self.desc)
+        return '{} (Basic layer)'.format(self.desc)
 
     def get_rind(self):
         return self.rind
@@ -29,7 +32,7 @@ class Layer:
     def get_desc(self):
         return self.desc
 
-class Source(Layer):
+class Source(BaseLayer):
     """
     `Source` docstring.
     """
@@ -41,7 +44,7 @@ class Source(Layer):
     def __repr__(self):
         return '{} (Source layer)'.format(self.desc)
 
-class Terminator(Layer):
+class Terminator(BaseLayer):
     """
     `Terminator` docstring.
     """
