@@ -4,8 +4,6 @@ Each `Layer` has some physical properties that we need to access (and
 possibly update) throughout our calculations.
 """
 
-import numpy as np
-
 class Layer:
     """
     `Layer` docstring.
