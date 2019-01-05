@@ -1,7 +1,11 @@
 """
 Contains the main transmission/reflection calculation bits
+
+TODO
+  * Fix the behavior of trig functions in the vicinity of pi/2
 """
 
+import numpy as np
 import scipy as sp
 
 def rt_amp(index, delta, theta, pol):
@@ -113,11 +117,11 @@ def r_interface(index1, index2, theta1, theta2, pol):
     reflected amplitude : float
         The amplitude of the reflected power
     """
-    if polarization == 's':
+    if pol == 's':
         s_numerator = (index1*np.cos(theta1) - index2*np.cos(theta2))
         s_denominator = (index1*np.cos(theta1) + index2*np.cos(theta2))
         return s_numerator/s_denominator
-    elif polarization == 'p':
+    elif pol == 'p':
         p_numerator = (index2*np.cos(theta1) - index1*np.cos(theta2))
         p_denominator = (index1*np.cos(theta2) + index2*np.cos(theta1))
         return p_numerator/p_denominator
@@ -146,11 +150,11 @@ def t_interface(index1, index2, theta1, theta2, pol):
     transmitted_amplitude : float
         The amplitude of the transmitted power
     """
-    if polarization == 's':
+    if pol == 's':
         s_numerator = 2*index1*np.cos(theta1)
         s_denominator = (index1*np.cos(theta1) + index2*np.cos(theta2))
         return s_numerator/s_denominator
-    elif polarization == 'p':
+    elif pol == 'p':
         p_numerator = 2*index1*np.cos(theta1)
         p_denominator = (index1*np.cos(theta2) + index2*np.cos(theta1))
         return p_numerator/p_denominator
