@@ -19,7 +19,7 @@ class Model:
         self.tands = None
         self.thicks = None
 
-    def freq_range(self, low_freq, high_freq, nsamples=1000, resolution=0):
+    def set_freq_range(self, low_freq, high_freq, nsample=1000):
         """
         Set the frequency range over which the model's response will be
         calculated.
@@ -34,21 +34,44 @@ class Model:
         Returns
         -------
         """
-        endpoint = True
-        if resolution > 0:
-            nsamples = round((high_freq - low_freq)/resolution)
-            endpoint = False
+        if nsample <= 0:
+            raise ValueError('nsample must be a positive number')
 
         self.low_freq = low_freq
         self.high_freq = high_freq
-        self.freq_range = np.linspace(low_freq, high_freq, num=nsamples,
-                                       endpoint=endpoint)
-        return
 
-#    def angle_range(self, low_angle, high_angle, nsamples=1000, resolution=0):
-#        """ Will implement once pi/2 is handled well """
-#        raise NotImplemented
+        if low_freq == high_freq:
+            self.freq_range = np.array([low_freq])
+        else:
+            self.freq_range = np.linspace(low_freq, high_freq, num=nsample)
+        return self.freq_range
 
+    def set_angle_range(self, low_angle, high_angle, nsample=1000, resolution=0):
+        """ Will implement once pi/2 is handled well """
+        raise NotImplementedError('Coming soon! Maybe!')
+
+    def set_up(self, layers, low_freq=500e6, high_freq=500e9, theta0=0., pol='s'):
+        """
+        Convenience function to get all the model bits and pieces in one
+        place.
+
+        Arguments
+        ---------
+
+        Returns
+        -------
+        """
+        # Check that the first and last layers are infinite boundaries
+        # and that there is at least one intervening material
+        if len(layers) < 3:
+            raise IndexError('Must pass a Source layer, at least one material '
+                             'layer, and a Terminator layer.')
+        if not isinstance(layers[0], armm.layer.Source):
+            raise TypeError('The first layer must be a Source layer.')
+        if not isinstance(layers[-1], armm.layer.Terminator):
+            raise TypeError('The last layer must be a Terminator layer.')
+
+        self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
 
 class Structure:
     def __init__(self):
