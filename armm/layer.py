@@ -39,6 +39,7 @@ class Source(BaseLayer):
     def __init__(self):
         super().__init__()
         self.thick = np.inf
+        self.previous = _Void()
         self.desc = 'Source layer'
 
     def __repr__(self):
@@ -47,11 +48,26 @@ class Source(BaseLayer):
 class Terminator(BaseLayer):
     """
     `Terminator` docstring.
+
+    Default case vacuum == True. `False` matches refractive index of previous
+    layer, but attenuation is set to zero.
     """
-    def __init__(self):
+    def __init__(self, vacuum=True):
         super().__init__()
         self.thick = np.inf
+        self.next = _Void()
         self.desc = 'Terminating layer'
+        self.vacuum = vacuum
 
     def __repr__(self):
         return '{} (Terminator layer)'.format(self.desc)
+
+class _Void(BaseLayer):
+    """     THE VOID     """
+    def __init__(self):
+        super().__init__()
+        self.thick = np.inf
+        self.desc = 'THE VOID'
+
+    def __repr__(self):
+        return 'There is nothing but {}'.format(self.desc)
