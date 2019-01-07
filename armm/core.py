@@ -240,7 +240,7 @@ def prop_wavenumber(k, d):
     Arguments
     ---------
     k : array
-        The wavevector
+        The wavenumber
     d : array
         An array of distances (thicknesses), ordered from source to
         terminating layer
@@ -257,3 +257,16 @@ def prop_wavenumber(k, d):
     # Now turn the error back on
     sp.seterr(**olderr)
     return delta
+
+def snell_angle(n, theta0):
+    """
+    Calculate the angle by which an incident ray is refracted
+    """
+    # Make a nice pairwise generator so we can avoid playing games with
+    # index counting
+    thetas = [theta0]
+    ngen = zip(n, n[1:])
+    for i, rind in enumerate(ngen):
+        theta = np.arcsin(np.real_if_close(rind[0]*np.sin(thetas[i])/rind[1]))
+        thetas.append(theta)
+    return thetas
