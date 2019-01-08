@@ -54,12 +54,16 @@ class CoreTest(unittest.TestCase):
 
     def test_wavenumber_normal_incidence(self):
         lossy = [True, False]
-        ans = [0., 0.]
+        ans = [2000*np.pi*np.sqrt(1 + 0.001j), 2000*np.pi]
         vals = zip(lossy, ans)
+        f = 150e9
+        n = 2.
+        tand = 0.001
+        theta = 0.
         for v in vals:
             with self.subTest(i=v):
-                self.assertEqual(
-                    core.wavenumber(150e9, 2., 0.001, 0., v[0]), v[1],
+                self.assertAlmostEqual(
+                    core.wavenumber(f, n, tand, theta, v[0]), v[1],
                     msg='Unexpected transmission at interface. Note: Trig operations'
                         ' in the vicinity of pi/2 are not currently handled well'
                         ' and result in strange behavior.')
@@ -127,6 +131,14 @@ class CoreTest(unittest.TestCase):
         corearr = core.make_2x2(1., 2., 3., 4.)
         self.assertTrue(np.array_equal(nparr, corearr),
             msg='The output of core.make_2x2() is not the same as np.array()!')
+
+    def test_refract_normal_incidence(self):
+        ns = [1., 2., 4., 9., 4., 2., 1.]
+        ans = [0.]*len(ns)
+        output = core.refract(ns, 0)
+        self.assertEqual(output, ans,
+            msg='Unexepected output. Expected this:\n{}\n'
+                'But got this:\n{}'.format(ans, output))
 
 if __name__ == '__main__':
     unittest.main()
