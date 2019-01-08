@@ -19,9 +19,9 @@ def rt_amp(index, delta, theta, pol):
         An array of refractive indices, ordered from source layer to
         terminator layer.
     delta : array
-        An array of wavevector offsets.
+        An array of wavenumber offsets.
     theta : array
-        An array of Snell angles in radians.
+        An array of angles in radians.
     pol : string
         The polarization of the source wave: 's' or 'p',
         or 'u'.
@@ -32,16 +32,16 @@ def rt_amp(index, delta, theta, pol):
         A tuple where 'r' is the reflected amplitude, and 't' is the
         transmitted amplitude.
     """
-    t_amp = np.zeros((len(self.structure), len(self.structure)),dtype=complex)
-    r_amp = np.zeros((len(self.structure), len(self.structure)), dtype=complex)
+    t_amp = np.zeros((len(index), len(index)),dtype=complex)
+    r_amp = np.zeros((len(index), len(index)), dtype=complex)
 
-    for i in range(len(self.structure)-1):
-        t_amp[i, i+1] = t_interface(pol, index[i], index[i+1], theta[i], theta[i+1])
-        r_amp[i, i+1] = r_interface(pol, index[i], index[i+1], theta[i], theta[i+1])
+    for i in range(len(index)-1):
+        t_amp[i, i+1] = t_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
+        r_amp[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
     
-    m_matrix = np.zeros((len(self.structure), 2, 2), dtype=complex)
-    m_r_amp = np.zeros((len(self.structure), 2, 2), dtype=complex)
-    m_t_amp = np.zeros((len(self.structure), 2, 2), dtype=complex)
+    m_matrix = np.zeros((len(index), 2, 2), dtype=complex)
+    m_r_amp = np.zeros((len(index), 2, 2), dtype=complex)
+    m_t_amp = np.zeros((len(index), 2, 2), dtype=complex)
     # The following commented lines don't actually do anything...
     # They should be deleted once that is confirmed.
 #    for i in range(1, len(self.structure)-1):
@@ -49,13 +49,13 @@ def rt_amp(index, delta, theta, pol):
 #                                    np.exp(1j*deltas[i]), dtype=complex)
 #        m_r_amp[i] = self._make_2x2(1., r_amp[i, i+1], r_amp[i, i+1],
 #                                    1., dtype=complex)
-    for i in range(1, len(self.structure)-1):
+    for i in range(1, len(index)-1):
         m_matrix[i] = (1/t_amp[i, i+1] * np.dot(
             make_2x2(np.exp(-1j*delta[i]), 0., 0., np.exp(1j*delta[i]), dtype=complex),
             make_2x2(1., r_amp[i, i+1], r_amp[i, i+1], 1., dtype=complex)))
 
     m_prime = make_2x2(1., 0., 0., 1., dtype=complex)
-    for i in range(1, len(self.structure)-1):
+    for i in range(1, len(index)-1):
         m_prime = np.dot(m_prime, m_matrix[i])
 
     m_prime = np.dot(make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex)/t_amp[0, 1], m_prime)
@@ -161,9 +161,9 @@ def t_interface(index1, index2, theta1, theta2, pol):
     else:
         raise ValueError("Polarization must be 's' or 'p'")
 
-def wavenumber(freq, index, tand, theta, lossy=True):
+def wavenumber(freq, index, tand, theta):
     """
-    Calculate the wavenumbers.
+    Calculate the wavenumber of a wave in a material.
 
     Arguments
     ---------
@@ -174,37 +174,29 @@ def wavenumber(freq, index, tand, theta, lossy=True):
     index : array
         An array of refractive indices, ordered from source to
         terminating layer
-        layer
     theta : array
-        An array of Snell angles (radians)
-    lossy : bool, optional
-        If `True` the wavevector will be found for a lossy material.
-        If `False` the wavevector will be found for lossless material.
-        Default is `True`.
+        An array of angles (radians)
 
     Returns
     -------
     k : array
         The complex wavenumber, k
     """
-    if lossy:
-#        k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1 + 0.5j*tand))
-        k = (2*np.pi*index*freq*np.cos(theta)/3e8 * np.sqrt((1 + 1j*tand)))
+#    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1 + 0.5j*tand))
+    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * np.sqrt((1 + 1j*tand)))
 
-#        c = 3e8
-#        a = 0.0926
-#        b = 0.840
-#        alpha = a*(freq/3e10)**b
-#        kap = (alpha*3e8)/(2*100*np.pi*freq*index)
-#        pre = 2*np.pi/c
-#        real = index**2 - kap**2
-#        imag = 2*index*kap
-#        tand = kap
-#        k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1+0.5j*tand))
-#        k = ((2*np.pi*index*np.cos(theta)*freq/3e10 + 
-#              1j*(0.0926*((freq/3e10)**0.840))/2))*100
-    else:
-        k = 2*np.pi*index*freq/3e8
+#    c = 3e8
+#    a = 0.0926
+#    b = 0.840
+#    alpha = a*(freq/3e10)**b
+#    kap = (alpha*3e8)/(2*100*np.pi*freq*index)
+#    pre = 2*np.pi/c
+#    real = index**2 - kap**2
+#    imag = 2*index*kap
+#    tand = kap
+#    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1+0.5j*tand))
+#    k = ((2*np.pi*index*np.cos(theta)*freq/3e10 + 
+#          1j*(0.0926*((freq/3e10)**0.840))/2))*100
     return k
 
 def make_2x2(a11, a12, a21, a22, dtype=float):
@@ -270,3 +262,43 @@ def refract(n, theta0):
         theta = np.arcsin(np.real_if_close(rind[0]*np.sin(thetas[i])/rind[1]))
         thetas.append(theta)
     return thetas
+
+def main(params):
+    """
+    Run a transmission/reflection calculation for the given parameters.
+
+    Arguments
+    ---------
+    params : dict
+
+    Returns
+    -------
+    result : dict
+    """
+    rind = params['rind']
+    thick = params['thick']
+    tand = params['tand']
+    pol = params['pol']
+    theta0 = params['theta0']
+    theta = refract(rind, theta0)
+    freq = params['freq']
+
+    # Create containers for the reflection/transmission values we calculate
+    # at each frequency
+    ts = []
+    rs = []
+
+    for f in freq:
+        ks = wavenumber(f, rind, tand, theta)
+        delta = prop_wavenumber(ks, thick)
+        r_amp, t_amp = rt_amp(rind, delta, theta, pol)
+        t_pow = t_power(t_amp, rind[0], rind[-1], theta[0], theta[-1])
+        r_pow = r_power(r_amp)
+        ts.append(t_pow)
+        rs.append(r_pow)
+
+    ts = np.asarray(ts)
+    rs = np.asarray(rs)
+
+    results = {'frequency':freq, 'transmission':ts, 'reflection':rs}
+    return results
