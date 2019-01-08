@@ -71,18 +71,17 @@ class Model:
         if not isinstance(layers[-1], armm.layer.Terminator):
             raise TypeError('The last layer must be a Terminator layer.')
 
-        self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
-        self.incident_angle = theta0
-        self.pol = pol
         self.struct = layers
-        self.rinds = [l.rind for l in layers]
-        self.tands = [l.tand for l in layers]
-        self.thicks = [l.thick for l in layers]
-
         term_layer = self.struct[-1]
         last_material = self.struct[-2]
         if not term_layer.vac:
             term_layer.rind = last_material.rind
+        self.rinds = [l.rind for l in self.struct]
+        self.tands = [l.tand for l in self.struct]
+        self.thicks = [l.thick for l in self.struct]
+        self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
+        self.incident_angle = theta0
+        self.pol = pol
 
         # The model elements that we need for the calculations are slightly
         # different than those that the user may care about. For that reason,
@@ -108,16 +107,16 @@ class Model:
         -------
         simargs : dict
         """
-        simargs = {'rind':rinds, 'tand':tands, 'thick':thicks, 'freq':freq_range}
+        sim_args = {'rind':rinds, 'tand':tands, 'thick':thicks, 'freq':freq_range}
 
         # Make sure we pass back important elements as numpy arrays instead
         # of the original lists
-        for key, val in simargs.items():
+        for key, val in sim_args.items():
             if not isinstance(val, np.ndarray):
-                simargs[key] = np.asarray(val)
-        simargs['theta0'] = theta0
-        simargs['pol'] = pol
-        return simargs
+                sim_args[key] = np.asarray(val)
+        sim_args['theta0'] = theta0
+        sim_args['pol'] = pol
+        return sim_args
 
     def reset_model(self):
         """
@@ -134,3 +133,19 @@ class Model:
         for key, val in self.__dict__.items():
             self.__dict__[key] = None
         return
+
+    def run(self):
+        """
+        Calculate transmission and reflection for the given model.
+
+        Returns
+        -------
+        results : dict
+        """
+        try:
+            assert bool(self._sim_params)
+        except AssertionError:
+            raise KeyError('Did not find calculation-ready parameters. '
+                           'Must call `set_up()` before calling `run()`')
+        results = armm.core.main(self._sim_params)
+        return results
