@@ -258,7 +258,7 @@ def prop_wavenumber(k, d):
     sp.seterr(**olderr)
     return delta
 
-def snell_angle(n, theta0):
+def refract(n, theta0):
     """
     Calculate the angle by which an incident ray is refracted
     """
