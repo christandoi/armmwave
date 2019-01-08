@@ -26,5 +26,3 @@ class ModelTest(unittest.TestCase):
         single_modarr = self.model.set_freq_range(low, hi)
         self.assertTrue(np.array_equal(single_chkarr, single_modarr),
             msg='Frequency arrays are not equal.')
-
-    
