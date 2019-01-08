@@ -73,10 +73,21 @@ class Model:
         self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
         self.incident_angle = theta0
         self.pol = pol
+        self.struct = layers
         self.rinds = [l.rind for l in layers]
         self.tands = [l.tand for l in layers]
         self.thicks = [l.thick for l in layers]
 
+        term_layer = self.struct[-1]
+        last_material = self.struct[-2]
+        if not term_layer.vac:
+            term_layer.rind = last_material.rind
+        return
+
+    def reset_model(self):
+        for key, val in self.__dict__.items():
+            self.__dict__[key] = None
+        return
 
 class Structure:
     def __init__(self):
