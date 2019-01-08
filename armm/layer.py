@@ -11,11 +11,11 @@ class BaseLayer:
     """
     `BaseLayer` docstring.
     """
-    def __init__(self):
-        self.rind = 1.
-        self.thick = 1. # Arbitrary non-zero thickness to avoid div(0) errors
-        self.tand = 0.
-        self.desc = 'Basic layer'
+    def __init__(self, rind=1., thick=1., tand=0., desc='Basic layer'):
+        self.rind = rind
+        self.thick = thick # Arbitrary non-zero thickness to avoid div(0) errors
+        self.tand = tand
+        self.desc = desc
 
     def __repr__(self):
         return '{} (Basic layer)'.format(self.desc)
@@ -49,15 +49,15 @@ class Terminator(BaseLayer):
     """
     `Terminator` docstring.
 
-    Default case vacuum == True. `False` matches refractive index of previous
+    Default case vac == True. `False` matches refractive index of previous
     layer, but attenuation is set to zero.
     """
-    def __init__(self, vacuum=True):
+    def __init__(self, vac=True):
         super().__init__()
         self.thick = np.inf
         self.next = _Void()
         self.desc = 'Terminating layer'
-        self.vacuum = vacuum
+        self.vac = vac
 
     def __repr__(self):
         return '{} (Terminator layer)'.format(self.desc)
