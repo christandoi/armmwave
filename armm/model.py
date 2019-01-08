@@ -83,7 +83,41 @@ class Model:
         last_material = self.struct[-2]
         if not term_layer.vac:
             term_layer.rind = last_material.rind
+
+        # The model elements that we need for the calculations are slightly
+        # different than those that the user may care about. For that reason,
+        # we'll store the simulation parameters self._sim_params as a dict
+        # and chalk it up as an implementation detail.
+        self._sim_params = self._set_up_sim(self.rinds, self.tands, self.thicks,
+                                            self.freq_range, self.incident_angle,
+                                            self.pol)
         return
+
+    def _set_up_sim(self, rinds, tands, thicks, freq_range, theta0, pol):
+        """
+        Ensure the user-supplied parameters are in a form that the core
+        calculation functions expect.
+
+        It is not recommended to call this function directly. Call
+        `Model().set_up()` instead.
+
+        Arguments
+        ---------
+
+        Returns
+        -------
+        simargs : dict
+        """
+        simargs = {'rind':rinds, 'tand':tands, 'thick':thicks, 'freq':freq_range}
+
+        # Make sure we pass back important elements as numpy arrays instead
+        # of the original lists
+        for key, val in simargs.items():
+            if not isinstance(val, np.ndarray):
+                simargs[key] = np.asarray(val)
+        simargs['theta0'] = theta0
+        simargs['pol'] = pol
+        return simargs
 
     def reset_model(self):
         """
