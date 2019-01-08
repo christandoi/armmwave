@@ -19,6 +19,7 @@ class Model:
         self.rinds = None
         self.tands = None
         self.thicks = None
+        self._sim_params = None
 
     def set_freq_range(self, low_freq, high_freq, nsample=1000):
         """
@@ -85,16 +86,17 @@ class Model:
         return
 
     def reset_model(self):
+        """
+        Reinitialize the `Model` with its default values: `None`.
+
+        Arguments
+        ---------
+        None
+
+        Returns
+        -------
+        None
+        """
         for key, val in self.__dict__.items():
             self.__dict__[key] = None
         return
-
-class Structure:
-    def __init__(self):
-        self.order = []
-
-    def assemble(self, layers):
-        """
-        Layers should be a list of layer objects
-        """
-        pass
