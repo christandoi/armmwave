@@ -5,6 +5,7 @@ of `Layer` objects.
 
 import numpy as np
 import armm.layer
+import armm.core
 
 class Model:
     def __init__(self):
@@ -36,10 +37,8 @@ class Model:
         """
         if nsample <= 0:
             raise ValueError('nsample must be a positive number')
-
         self.low_freq = low_freq
         self.high_freq = high_freq
-
         if low_freq == high_freq:
             self.freq_range = np.array([low_freq])
         else:
@@ -72,6 +71,12 @@ class Model:
             raise TypeError('The last layer must be a Terminator layer.')
 
         self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
+        self.incident_angle = theta0
+        self.pol = pol
+        self.rinds = [l.rind for l in layers]
+        self.tands = [l.tand for l in layers]
+        self.thicks = [l.thick for l in layers]
+
 
 class Structure:
     def __init__(self):
