@@ -32,6 +32,14 @@ class BaseLayer:
     def get_desc(self):
         return self.desc
 
+class Layer(BaseLayer):
+    """
+    `Layer` docstring.
+    """
+    def __init__(self):
+        super().__init__()
+        self.desc = 'Layer'
+
 class Source(BaseLayer):
     """
     `Source` docstring.
@@ -56,7 +64,7 @@ class Terminator(BaseLayer):
         super().__init__()
         self.thick = np.inf
         self.next = _Void()
-        self.desc = 'Terminating layer'
+        self.desc = 'Terminator layer'
         self.vac = vac
 
     def __repr__(self):
