@@ -1,1 +1,2 @@
-This is a major refactor of artools. Starting from scratch. So really a rewrite?
+# armm
+Code that calculates transmission and reflection of by materials at millimeter wavelengths.
