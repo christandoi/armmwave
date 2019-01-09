@@ -261,7 +261,7 @@ def refract(n, theta0):
     for i, rind in enumerate(ngen):
         theta = np.arcsin(np.real_if_close(rind[0]*np.sin(thetas[i])/rind[1]))
         thetas.append(theta)
-    return thetas
+    return np.asarray(thetas)
 
 def main(params):
     """
