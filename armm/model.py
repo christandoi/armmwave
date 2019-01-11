@@ -15,11 +15,11 @@ class Model:
         self.freq_range = None
         self.pol = None
         self.incident_angle = None
-        self.snell_angles = None
         self.rinds = None
         self.tands = None
         self.thicks = None
         self._sim_params = None
+        self._sim_results = None
 
     def set_freq_range(self, low_freq, high_freq, nsample=1000):
         """
@@ -148,4 +148,30 @@ class Model:
             raise KeyError('Did not find calculation-ready parameters. '
                            'Must call `set_up()` before calling `run()`')
         results = armm.core.main(self._sim_params)
+        self._sim_results = results
         return results
+
+    def save(self, dest):
+        """
+        Write transmission and reflection calculation results to a file,
+        including a header describing the sinulation parameters.
+        """
+        fs = self._sim_results['frequency']
+        rs = self._sim_results['reflection']
+        ts = self._sim_results['transmission']
+
+        header = [
+            'Structure: {}'.format(self.struct),
+            'Frequency lower bound (Hz): {}'.format(self.low_freq),
+            'Frequency upper bound (Hz): {}'.format(self.high_freq),
+            'Incident angle (rad): {}'.format(self.incident_angle),
+            'Polarization: {}'.format(self.pol),
+            'Refractive indices: {}'.format(self.rinds),
+            'Loss tangents: {}'.format(self.tands),
+            'Thicknesses (m): {}'.format(self.thicks),
+            '\n',
+            'Frequency\t\t\tTransmission\t\t\tReflection',]
+
+        np.savetxt(dest, np.c_[fs, ts, rs], delimiter='\t',
+                    header='\n'.join(header))
+        return

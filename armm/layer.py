@@ -7,6 +7,7 @@ throughout our calculations.
 
 import numpy as np
 
+
 class BaseLayer:
     """
     `BaseLayer` docstring.
@@ -32,6 +33,16 @@ class BaseLayer:
     def get_desc(self):
         return self.desc
 
+
+class Layer(BaseLayer):
+    """
+    `Layer` docstring.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.desc = 'Layer'
+
+
 class Source(BaseLayer):
     """
     `Source` docstring.
@@ -45,6 +56,7 @@ class Source(BaseLayer):
     def __repr__(self):
         return '{} (Source layer)'.format(self.desc)
 
+
 class Terminator(BaseLayer):
     """
     `Terminator` docstring.
@@ -56,11 +68,12 @@ class Terminator(BaseLayer):
         super().__init__()
         self.thick = np.inf
         self.next = _Void()
-        self.desc = 'Terminating layer'
+        self.desc = 'Terminator layer'
         self.vac = vac
 
     def __repr__(self):
         return '{} (Terminator layer)'.format(self.desc)
+
 
 class _Void(BaseLayer):
     """     THE VOID     """
