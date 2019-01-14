@@ -182,6 +182,14 @@ def wavenumber(freq, index, tand, theta):
     k : array
         The complex wavenumber, k
     """
+#    a = 0.17999999999999997#0.03660177651132055
+#    b = 0.9317947894449754
+#    alpha = a*(freq/30e9)**b # Hz --> icm
+#    kp = (3e10/(4*np.pi*freq*index)) * alpha
+#    ep = index**2 - kp**2
+#    epp = 2*index*kp
+#    tand = epp/ep
+    
 #    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1 + 0.5j*tand))
     k = (2*np.pi*index*freq*np.cos(theta)/3e8 * np.sqrt((1 + 1j*tand)))
 
