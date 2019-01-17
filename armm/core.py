@@ -182,30 +182,59 @@ def wavenumber(freq, index, tand, theta):
     k : array
         The complex wavenumber, k
     """
-#    a = 0.17999999999999997#0.03660177651132055
-#    b = 0.9317947894449754
-#    alpha = a*(freq/30e9)**b # Hz --> icm
-#    kp = (3e10/(4*np.pi*freq*index)) * alpha
-#    ep = index**2 - kp**2
-#    epp = 2*index*kp
-#    tand = epp/ep
-    
-#    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1 + 0.5j*tand))
     k = (2*np.pi*index*freq*np.cos(theta)/3e8 * np.sqrt((1 + 1j*tand)))
 
-#    c = 3e8
-#    a = 0.0926
-#    b = 0.840
-#    alpha = a*(freq/3e10)**b
-#    kap = (alpha*3e8)/(2*100*np.pi*freq*index)
-#    pre = 2*np.pi/c
-#    real = index**2 - kap**2
-#    imag = 2*index*kap
-#    tand = kap
-#    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * (1+0.5j*tand))
-#    k = ((2*np.pi*index*np.cos(theta)*freq/3e10 + 
-#          1j*(0.0926*((freq/3e10)**0.840))/2))*100
     return k
+
+def alpha2tand(freq, a, b, n):
+    """
+    Convert Halpern's 'a' and 'b' from an absorption coefficient
+    of the form `a*freq**b` to a (frequency-dependent) loss tangent. 
+
+    Arguments
+    ---------
+    freq : array or float
+        The frequency (Hz) (or frequencies) at which to calculate the loss
+        tangent.
+    a : float
+        Halpern's 'a' coefficient
+    b : float
+        Halpern's 'b' coefficient
+    n : float
+        The real part of the material's refractive index
+
+    Returns
+    -------
+    tand : array
+    """
+    nu = freq/30e9
+    # First we need the frequency-dependent absorption coefficient,
+    # alpha, which we get from the Halpern fit. From that we will
+    # calculate k(appa), the extinction coefficient, for each
+    # frequency of interest
+    alpha = a*nu**b
+
+    # This is the absorption-extinction coefficient relation as ~written
+    # in Born & Wolf Principles of Optics 1st Ed., 1959, Ch. 13.1,
+    # Pg. 614, Eq. 21
+    # The factor of 3e10 (c in units of cms^-1) ensures that our k is
+    # unitless, as it ought to be.
+    k = (100*3e8*alpha) / (4*np.pi*n*freq)
+
+    # The complex index of refraction of a material is related to the
+    # complex (relative) permittivity by the relation:
+    #   e_r = e' + i*e'' = n^2 = (n + i*k)^2 = n^2 - k^2 + i*2nk
+    # By equating the real and imaginary parts we are left with:
+    #   e' = (n^2 - k^2); e'' = 2nk
+    # With this information we can find the loss tangent, which is simply
+    # the ratio of the real and imaginary parts of the relative
+    # permittivity:
+    #   tand = (e''/e')
+    ep = n**2 - k**2
+    epp = 2*n*k
+    tand = epp/ep
+    return tand
+
 
 def make_2x2(a11, a12, a21, a22, dtype=float):
     """
