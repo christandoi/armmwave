@@ -28,7 +28,7 @@ def rt_amp(index, delta, theta, pol):
 
     Returns
     -------
-    (r, t) : tuple
+    r, t : tuple
         A tuple where 'r' is the reflected amplitude, and 't' is the
         transmitted amplitude.
     """
@@ -65,7 +65,7 @@ def rt_amp(index, delta, theta, pol):
 
 def r_power(r_amp):
     """
-    Return fraction of reflected power.
+    Return the fraction of reflected power.
 
     Arguments
     ---------
