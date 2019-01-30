@@ -40,15 +40,7 @@ def rt_amp(index, delta, theta, pol):
         r_amp[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
     
     m_matrix = np.zeros((len(index), 2, 2), dtype=complex)
-    m_r_amp = np.zeros((len(index), 2, 2), dtype=complex)
-    m_t_amp = np.zeros((len(index), 2, 2), dtype=complex)
-    # The following commented lines don't actually do anything...
-    # They should be deleted once that is confirmed.
-#    for i in range(1, len(self.structure)-1):
-#        m_t_amp[i] = self._make_2x2(np.exp(-1j*deltas[i]), 0., 0.,
-#                                    np.exp(1j*deltas[i]), dtype=complex)
-#        m_r_amp[i] = self._make_2x2(1., r_amp[i, i+1], r_amp[i, i+1],
-#                                    1., dtype=complex)
+
     for i in range(1, len(index)-1):
         m_matrix[i] = (1/t_amp[i, i+1] * np.dot(
             make_2x2(np.exp(-1j*delta[i]), 0., 0., np.exp(1j*delta[i]), dtype=complex),
@@ -60,7 +52,7 @@ def rt_amp(index, delta, theta, pol):
 
     m_prime = np.dot(make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex)/t_amp[0, 1], m_prime)
     trans_amp = 1/m_prime[0, 0]
-    ref_amp = m_prime[0, 1]/m_prime[0, 0]
+    ref_amp = m_prime[1, 0]/m_prime[0, 0]
     return (ref_amp, trans_amp)
 
 def r_power(r_amp):
@@ -186,10 +178,73 @@ def wavenumber(freq, index, tand, theta):
 
     return k
 
+#def wavenumber_comp(freq, index, tand, theta):
+#    """
+#    Calculate the complex wavenumber of a wave in a material.
+#    This function is extraneous for now. Please ignore.
+#
+#    Arguments
+#    ---------
+#    freq : float
+#        The frequency at which to calculate the wavevector, k
+#    tand : array
+#        An array of loss tangents, ordered from source to terminating
+#    index : array
+#        An array of refractive indices, ordered from source to
+#        terminating layer
+#    theta : array
+#        An array of angles (radians)
+#
+#    Returns
+#    -------
+#    k : array
+#        The complex wavenumber, k
+#    """
+#    extinc_coeff = tand*index/2
+#    comp_index = index + 1j*extinc_coeff
+#    k = (2*np.pi*comp_index*freq*np.cos(theta)/3e8)
+#    return k
+
+def alpha2imagn(freq, a, b, n):
+    """
+    Convert Halpern's 'a' and 'b' from an absorption coefficient
+    of the form `a*freq**b` to a (frequency-dependent) .
+
+    Arguments
+    ---------
+    freq : array or float
+        The frequency (Hz) (or frequencies) at which to calculate the loss
+        tangent.
+    a : float
+        Halpern's 'a' coefficient
+    b : float
+        Halpern's 'b' coefficient
+    n : float
+        The real part of the material's refractive index
+
+    Returns
+    -------
+    imagn : array or float
+    """
+    nu = freq/30e9
+    # First we need the frequency-dependent absorption coefficient,
+    # alpha, which we get from the Halpern fit. From that we will
+    # calculate k(appa), the extinction coefficient, for each
+    # frequency of interest
+    alpha = 2*a*nu**b
+
+    # This is the absorption-extinction coefficient relation as ~written
+    # in Born & Wolf Principles of Optics 1st Ed., 1959, Ch. 13.1,
+    # Pg. 614, Eq. 21
+    # The factor of 3e10 (c in units of cms^-1) ensures that our k is
+    # unitless, as it ought to be.
+    imagn = (100*3e8*alpha) / (4*np.pi*n*freq)
+    return imagn
+
 def alpha2tand(freq, a, b, n):
     """
     Convert Halpern's 'a' and 'b' from an absorption coefficient
-    of the form `a*freq**b` to a (frequency-dependent) loss tangent. 
+    of the form `a*freq**b` to a (frequency-dependent) loss tangent.
 
     Arguments
     ---------
@@ -207,19 +262,7 @@ def alpha2tand(freq, a, b, n):
     -------
     tand : array
     """
-    nu = freq/30e9
-    # First we need the frequency-dependent absorption coefficient,
-    # alpha, which we get from the Halpern fit. From that we will
-    # calculate k(appa), the extinction coefficient, for each
-    # frequency of interest
-    alpha = a*nu**b
-
-    # This is the absorption-extinction coefficient relation as ~written
-    # in Born & Wolf Principles of Optics 1st Ed., 1959, Ch. 13.1,
-    # Pg. 614, Eq. 21
-    # The factor of 3e10 (c in units of cms^-1) ensures that our k is
-    # unitless, as it ought to be.
-    k = (100*3e8*alpha) / (4*np.pi*n*freq)
+    imagn = alpha2imagn(freq, a, b, n)
 
     # The complex index of refraction of a material is related to the
     # complex (relative) permittivity by the relation:
@@ -230,8 +273,8 @@ def alpha2tand(freq, a, b, n):
     # the ratio of the real and imaginary parts of the relative
     # permittivity:
     #   tand = (e''/e')
-    ep = n**2 - k**2
-    epp = 2*n*k
+    ep = n**2 - imagn**2
+    epp = 2*n*imagn
     tand = epp/ep
     return tand
 
@@ -300,6 +343,11 @@ def refract(n, theta0):
         thetas.append(theta)
     return np.asarray(thetas)
 
+def replace_tand(freq, tand_array, halpern_dict):
+    for k, v in halpern_dict.items():
+        tand_array[k] = alpha2tand(freq, v['a'], v['b'], v['n'])
+    return tand_array
+
 def main(params):
     """
     Run a transmission/reflection calculation for the given parameters.
@@ -319,6 +367,7 @@ def main(params):
     theta0 = params['theta0']
     theta = refract(rind, theta0)
     freq = params['freq']
+    halps = params['halpern_layers']
 
     # Create containers for the reflection/transmission values we calculate
     # at each frequency
@@ -326,6 +375,8 @@ def main(params):
     rs = []
 
     for f in freq:
+        if len(halps.keys()) > 0:
+            tand = replace_tand(f, tand, halps)
         ks = wavenumber(f, rind, tand, theta)
         delta = prop_wavenumber(ks, thick)
         r_amp, t_amp = rt_amp(rind, delta, theta, pol)

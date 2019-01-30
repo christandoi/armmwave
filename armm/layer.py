@@ -38,10 +38,11 @@ class Layer(BaseLayer):
     """
     `Layer` docstring.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, halperna=None, halpernb=None, **kwargs):
         super().__init__(**kwargs)
         self.desc = 'Layer'
-
+        self.halperna = halperna
+        self.halpernb = halpernb
 
 class Source(BaseLayer):
     """
