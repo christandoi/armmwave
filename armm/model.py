@@ -2,7 +2,7 @@
 Contains the methods and attributes of a `Model`, which is an assembly
 of `Layer` objects.
 """
-
+import sys
 import numpy as np
 import armm.layer
 import armm.core
@@ -17,6 +17,7 @@ class Model:
         self.incident_angle = None
         self.rinds = None
         self.tands = None
+        self.halpern_layers = None
         self.thicks = None
         self._sim_params = None
         self._sim_results = None
@@ -76,10 +77,31 @@ class Model:
         last_material = self.struct[-2]
         if not term_layer.vac:
             term_layer.rind = last_material.rind
+        # We need to check whether any of the layers will use a frequency-
+        # dependent loss tangent based on Halpern's 'a' and 'b' coefficients.
+        # If so, we need to pass the position of that layer to the core code
+        # so it knows which layers have a static loss tangent. We will also
+        # pass the 'a', 'b', and 'n' of the layer so that everything we need
+        # to calculate the loss tangent is in one place. It's easiest to do
+        # this with a dictionary that is keyed by the list index of the layer(s)
+        # in question
+        self.halpern_layers = {}
+        for index, l in enumerate(self.struct):
+            if l.desc != 'Source layer' and l.desc != 'Terminator layer':
+                 try:
+                     if isinstance(l.halperna, float) and isinstance(l.halpernb, float):
+                         self.halpern_layers[index] = {'a':l.halperna, 'b':l.halpernb,
+                                                       'n':l.rind}
+                 except AttributeError:
+                     print('No Halpern coefficient found in {}'.format(l))
+                     print('You shouldn\'t have made it here. How weird!')
+                     sys.exit(1)
+
         self.rinds = [l.rind for l in self.struct]
         self.tands = [l.tand for l in self.struct]
         self.thicks = [l.thick for l in self.struct]
-        self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
+        if self.freq_range is None:
+            self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
         self.incident_angle = theta0
         self.pol = pol
 
@@ -89,10 +111,11 @@ class Model:
         # and chalk it up as an implementation detail.
         self._sim_params = self._set_up_sim(self.rinds, self.tands, self.thicks,
                                             self.freq_range, self.incident_angle,
-                                            self.pol)
+                                            self.pol, self.halpern_layers)
         return
 
-    def _set_up_sim(self, rinds, tands, thicks, freq_range, theta0, pol):
+    def _set_up_sim(self, rinds, tands, thicks, freq_range, theta0, pol,
+                    halpern_layers):
         """
         Ensure the user-supplied parameters are in a form that the core
         calculation functions expect.
@@ -116,6 +139,7 @@ class Model:
                 sim_args[key] = np.asarray(val)
         sim_args['theta0'] = theta0
         sim_args['pol'] = pol
+        sim_args['halpern_layers'] = halpern_layers
         return sim_args
 
     def reset_model(self):
