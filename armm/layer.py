@@ -40,9 +40,12 @@ class Layer(BaseLayer):
     """
     def __init__(self, halperna=None, halpernb=None, **kwargs):
         super().__init__(**kwargs)
-        self.desc = 'Layer'
         self.halperna = halperna
         self.halpernb = halpernb
+
+    def __repr__(self):
+        return '{} (Sim layer)'.format(self.desc)
+
 
 class Source(BaseLayer):
     """
