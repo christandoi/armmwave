@@ -75,8 +75,13 @@ class Model:
         self.struct = layers
         term_layer = self.struct[-1]
         last_material = self.struct[-2]
-        if not term_layer.vac:
-            term_layer.rind = last_material.rind
+        # It could be that we want to use a terminating layer with a refractive
+        # index != 1, so we'll check for that here. If the user has set a n
+        # to be something other than 1, then we don't really care what they
+        # set 'vac' to be, so we short circuit that logic.
+        if term_layer.rind == 1.0:
+            if not term_layer.vac:
+                term_layer.rind = last_material.rind
         # We need to check whether any of the layers will use a frequency-
         # dependent loss tangent based on Halpern's 'a' and 'b' coefficients.
         # If so, we need to pass the position of that layer to the core code
