@@ -49,10 +49,17 @@ class Layer(BaseLayer):
 
 class Source(BaseLayer):
     """
-    `Source` docstring.
+    The Source is required to be the first layer in the stack.
+
+    The source may have any refractive index or loss tangent, but it is
+    required to have infinite thickness.
+
+    NOTE: While it is possible to set the loss tangent of the layer to a
+    non-zero value, it is not recommended. The case of an absorbing
+    initial medium is not implemented yet.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.thick = np.inf
         self.previous = _Void()
         self.desc = 'Source layer'
@@ -63,13 +70,17 @@ class Source(BaseLayer):
 
 class Terminator(BaseLayer):
     """
-    `Terminator` docstring.
+    The Terminator is required to be the last layer in the stack.
 
-    Default case vac == True. `False` matches refractive index of previous
-    layer, but attenuation is set to zero.
+    The Terminator layer may have any refractive index or loss tangent, but
+    it must have infinite thickness. As a convenience, the Terminator layer
+    may be instantiated with the `vac` flag, where the default is `vac ==
+    True`. `True` sets the refractive index of the Terminator to 1, and its
+    attenuation to 0. `False` matches refractive index of previous
+    layer, again setting the Terminator's attenuation to zero.
     """
-    def __init__(self, vac=True):
-        super().__init__()
+    def __init__(self, vac=True, **kwargs):
+        super().__init__(**kwargs)
         self.thick = np.inf
         self.next = _Void()
         self.desc = 'Terminator layer'
