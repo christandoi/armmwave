@@ -32,28 +32,63 @@ def rt_amp(index, delta, theta, pol):
         A tuple where 'r' is the reflected amplitude, and 't' is the
         transmitted amplitude.
     """
-    t_amp = np.zeros((len(index), len(index)),dtype=complex)
-    r_amp = np.zeros((len(index), len(index)), dtype=complex)
-
-    for i in range(len(index)-1):
-        t_amp[i, i+1] = t_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
-        r_amp[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
-    
-    m_matrix = np.zeros((len(index), 2, 2), dtype=complex)
-
-    for i in range(1, len(index)-1):
-        m_matrix[i] = (1 / t_amp[i, i+1] * np.dot(
-            make_2x2(np.exp(-1j * delta[i]), 0., 0., np.exp(1j * delta[i]), dtype=complex),
-            make_2x2(1., r_amp[i, i+1], r_amp[i, i+1], 1., dtype=complex)))
+    t_amp, r_amp = make_rt_amp_matrix(index, theta, pol)
+    m_mat = make_m_matrix(index, t_amp, r_amp, delta)
 
     m_prime = make_2x2(1., 0., 0., 1., dtype=complex)
     for i in range(1, len(index)-1):
-        m_prime = np.dot(m_prime, m_matrix[i])
+        m_prime = np.dot(m_prime, m_mat[i])
 
-    m_prime = np.dot(make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex) / t_amp[0, 1], m_prime)
+    C_m = make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex)
+    m_prime = np.dot(C_m / t_amp[0, 1], m_prime)
     trans_amp = 1 / m_prime[0, 0]
     ref_amp = m_prime[1, 0] / m_prime[0, 0]
-    return (ref_amp, trans_amp)
+    return ref_amp, trans_amp
+
+def make_rt_amp_matrix(index, theta, pol):
+    """
+    Construct reflection and transmission amplitude matrices
+
+    Parameters
+    ----------
+    index : numpy array
+    theta : numpy array
+    pol : string
+
+    Returns
+    -------
+    t_mat, r_mat : tuple
+        The t- and r-amplitude matrices.
+    """
+    t_mat = np.zeros((len(index), len(index)), dtype=complex)
+    r_mat = np.zeros((len(index), len(index)), dtype=complex)
+    for i in range(len(index) - 1):
+        t_mat[i, i+1] = t_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
+        r_mat[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
+    return t_mat, r_mat
+
+def make_m_matrix(index, t_matrix, r_matrix, delta):
+    """
+    Construct the M-matrix
+
+    Parameters
+    ----------
+    index : numpy array
+    t_matrix : numpy array
+    r_matrix : numpy array
+    delta : numpy array
+
+    Returns
+    -------
+    m_mat : numpy array
+    """
+    m_mat = np.zeros((len(index), 2, 2), dtype=complex)
+    for i in range(1, len(index)-1):
+        C_m = make_2x2(np.exp(-1j * delta[i]), 0., 0., np.exp(1j * delta[i]),
+                       dtype=complex)
+        r_m = make_2x2(1., r_matrix[i, i+1], r_matrix[i, i+1], 1., dtype=complex)
+        m_mat[i] = (1 / t_matrix[i, i+1]) * np.dot(C_m, r_m)
+    return m_mat
 
 def r_power(r_amp):
     """
