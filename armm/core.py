@@ -32,28 +32,63 @@ def rt_amp(index, delta, theta, pol):
         A tuple where 'r' is the reflected amplitude, and 't' is the
         transmitted amplitude.
     """
-    t_amp = np.zeros((len(index), len(index)),dtype=complex)
-    r_amp = np.zeros((len(index), len(index)), dtype=complex)
-
-    for i in range(len(index)-1):
-        t_amp[i, i+1] = t_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
-        r_amp[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
-    
-    m_matrix = np.zeros((len(index), 2, 2), dtype=complex)
-
-    for i in range(1, len(index)-1):
-        m_matrix[i] = (1/t_amp[i, i+1] * np.dot(
-            make_2x2(np.exp(-1j*delta[i]), 0., 0., np.exp(1j*delta[i]), dtype=complex),
-            make_2x2(1., r_amp[i, i+1], r_amp[i, i+1], 1., dtype=complex)))
+    t_amp, r_amp = make_rt_amp_matrix(index, theta, pol)
+    m_mat = make_m_matrix(index, t_amp, r_amp, delta)
 
     m_prime = make_2x2(1., 0., 0., 1., dtype=complex)
     for i in range(1, len(index)-1):
-        m_prime = np.dot(m_prime, m_matrix[i])
+        m_prime = np.dot(m_prime, m_mat[i])
 
-    m_prime = np.dot(make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex)/t_amp[0, 1], m_prime)
-    trans_amp = 1/m_prime[0, 0]
-    ref_amp = m_prime[1, 0]/m_prime[0, 0]
-    return (ref_amp, trans_amp)
+    C_m = make_2x2(1., r_amp[0, 1], r_amp[0, 1], 1., dtype=complex)
+    m_prime = np.dot(C_m / t_amp[0, 1], m_prime)
+    trans_amp = 1 / m_prime[0, 0]
+    ref_amp = m_prime[1, 0] / m_prime[0, 0]
+    return ref_amp, trans_amp
+
+def make_rt_amp_matrix(index, theta, pol):
+    """
+    Construct reflection and transmission amplitude matrices
+
+    Parameters
+    ----------
+    index : numpy array
+    theta : numpy array
+    pol : string
+
+    Returns
+    -------
+    t_mat, r_mat : tuple
+        The t- and r-amplitude matrices.
+    """
+    t_mat = np.zeros((len(index), len(index)), dtype=complex)
+    r_mat = np.zeros((len(index), len(index)), dtype=complex)
+    for i in range(len(index) - 1):
+        t_mat[i, i+1] = t_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
+        r_mat[i, i+1] = r_interface(index[i], index[i+1], theta[i], theta[i+1], pol)
+    return t_mat, r_mat
+
+def make_m_matrix(index, t_matrix, r_matrix, delta):
+    """
+    Construct the M-matrix
+
+    Parameters
+    ----------
+    index : numpy array
+    t_matrix : numpy array
+    r_matrix : numpy array
+    delta : numpy array
+
+    Returns
+    -------
+    m_mat : numpy array
+    """
+    m_mat = np.zeros((len(index), 2, 2), dtype=complex)
+    for i in range(1, len(index)-1):
+        C_m = make_2x2(np.exp(-1j * delta[i]), 0., 0., np.exp(1j * delta[i]),
+                       dtype=complex)
+        r_m = make_2x2(1., r_matrix[i, i+1], r_matrix[i, i+1], 1., dtype=complex)
+        m_mat[i] = (1 / t_matrix[i, i+1]) * np.dot(C_m, r_m)
+    return m_mat
 
 def r_power(r_amp):
     """
@@ -85,7 +120,12 @@ def t_power(t_amp, index_i, index_f, theta_i, theta_f):
     theta_f : float
         The angle of incidence (radians) at the final interface.
     """
-    return np.abs(t_amp**2)*(index_f*np.cos(theta_f)/index_i*np.cos(theta_i))
+    if np.isclose(theta_i, np.pi/2):
+        raise ValueError('Incident angle is too close to pi/2. '\
+                         'Maximum allowed angle is '\
+                         '89.999 degrees ~= 1.5707788735023767 radians.')
+    return np.abs(t_amp**2) * \
+           ( (index_f * np.cos(theta_f)) / (index_i * np.cos(theta_i) ) )
 
 def r_interface(index1, index2, theta1, theta2, pol):
     """
@@ -109,16 +149,19 @@ def r_interface(index1, index2, theta1, theta2, pol):
     reflected amplitude : float
         The amplitude of the reflected power
     """
+    if np.isclose(theta1, np.pi/2):
+        raise ValueError('Incident angle is too close to pi/2. '\
+                         'Maximum allowed angle is '\
+                         '89.999 degrees ~= 1.5707788735023767 radians.')
     if pol == 's':
-        s_numerator = (index1*np.cos(theta1) - index2*np.cos(theta2))
-        s_denominator = (index1*np.cos(theta1) + index2*np.cos(theta2))
-        return s_numerator/s_denominator
+        numerator = (index1 * np.cos(theta1) - index2 * np.cos(theta2))
+        denominator = (index1 * np.cos(theta1) + index2 * np.cos(theta2))
     elif pol == 'p':
-        p_numerator = (index2*np.cos(theta1) - index1*np.cos(theta2))
-        p_denominator = (index1*np.cos(theta2) + index2*np.cos(theta1))
-        return p_numerator/p_denominator
+        numerator = (index2 * np.cos(theta1) - index1 * np.cos(theta2))
+        denominator = (index1 * np.cos(theta2) + index2 * np.cos(theta1))
     else:
         raise ValueError("Polarization must be 's' or 'p'")
+    return numerator / denominator
 
 def t_interface(index1, index2, theta1, theta2, pol):
     """
@@ -143,19 +186,18 @@ def t_interface(index1, index2, theta1, theta2, pol):
         The amplitude of the transmitted power
     """
     if pol == 's':
-        s_numerator = 2*index1*np.cos(theta1)
-        s_denominator = (index1*np.cos(theta1) + index2*np.cos(theta2))
-        return s_numerator/s_denominator
+        numerator = 2 * index1 * np.cos(theta1)
+        denominator = (index1 * np.cos(theta1) + index2 * np.cos(theta2))
     elif pol == 'p':
-        p_numerator = 2*index1*np.cos(theta1)
-        p_denominator = (index1*np.cos(theta2) + index2*np.cos(theta1))
-        return p_numerator/p_denominator
+        numerator = 2 * index1 * np.cos(theta1)
+        denominator = (index1 * np.cos(theta2) + index2 * np.cos(theta1))
     else:
         raise ValueError("Polarization must be 's' or 'p'")
+    return numerator / denominator
 
 def wavenumber(freq, index, tand, theta):
     """
-    Calculate the wavenumber of a wave in a material.
+    Calculate the wavenumber in a material.
 
     Arguments
     ---------
@@ -174,8 +216,7 @@ def wavenumber(freq, index, tand, theta):
     k : array
         The complex wavenumber, k
     """
-    k = (2*np.pi*index*freq*np.cos(theta)/3e8 * np.sqrt((1 + 1j*tand)))
-
+    k = 2 * np.pi * (freq / 3e8) * np.cos(theta) * index * np.sqrt(1 + 1j * tand)
     return k
 
 #def wavenumber_comp(freq, index, tand, theta):
@@ -226,19 +267,19 @@ def alpha2imagn(freq, a, b, n):
     -------
     imagn : array or float
     """
-    nu = freq/30e9
+    nu = freq / 30e9
     # First we need the frequency-dependent absorption coefficient,
     # alpha, which we get from the Halpern fit. From that we will
     # calculate k(appa), the extinction coefficient, for each
     # frequency of interest
-    alpha = 2*a*nu**b
+    alpha = 2 * a * nu**b
 
     # This is the absorption-extinction coefficient relation as ~written
     # in Born & Wolf Principles of Optics 1st Ed., 1959, Ch. 13.1,
     # Pg. 614, Eq. 21
     # The factor of 3e10 (c in units of cms^-1) ensures that our k is
     # unitless, as it ought to be.
-    imagn = (100*3e8*alpha) / (4*np.pi*n*freq)
+    imagn = (100 * 3e8 * alpha) / (4 * np.pi * n * freq)
     return imagn
 
 def alpha2tand(freq, a, b, n):
@@ -274,8 +315,8 @@ def alpha2tand(freq, a, b, n):
     # permittivity:
     #   tand = (e''/e')
     ep = n**2 - imagn**2
-    epp = 2*n*imagn
-    tand = epp/ep
+    epp = 2 * n * imagn
+    tand = epp / ep
     return tand
 
 
@@ -309,6 +350,9 @@ def prop_wavenumber(k, d):
     """
     Calculate the wavenumber offset, delta.
 
+    Note that the distance correction for off-normal incidence is rolled
+    into the wavenumber calculation.
+
     Arguments
     ---------
     k : array
@@ -322,10 +366,9 @@ def prop_wavenumber(k, d):
     delta : array
         The phase difference
     """
-    # Turn off 'invalid multiplication' error;
-    # It's just the 'inf' boundaries.
+    # Turn off 'invalid multiplication' error; it's just the 'inf' boundaries
     olderr = sp.seterr(invalid='ignore')
-    delta = k*d
+    delta = k * d
     # Now turn the error back on
     sp.seterr(**olderr)
     return delta
@@ -334,12 +377,18 @@ def refract(n, theta0):
     """
     Calculate the angle by which an incident ray is refracted
     """
+    if np.isclose(np.abs(theta0), np.pi/2):
+        raise NotImplementedError('Incident angle is too close to pi/2. '\
+                                  'Maximum allowed angle is '\
+                                  '89.999 degrees ~= 1.5707788735023767 radians. '\
+                                  'Use caution when interpreting results '\
+                                  'from such extreme incident angles.')
     # Make a nice pairwise generator so we can avoid playing games with
     # index counting
     thetas = [theta0]
     ngen = zip(n, n[1:])
     for i, rind in enumerate(ngen):
-        theta = np.arcsin(np.real_if_close(rind[0]*np.sin(thetas[i])/rind[1]))
+        theta = np.arcsin(np.real_if_close( rind[0] * np.sin(thetas[i]) / rind[1] ))
         thetas.append(theta)
     return np.asarray(thetas)
 
