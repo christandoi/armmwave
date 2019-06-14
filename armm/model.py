@@ -107,6 +107,10 @@ class Model:
         self.thicks = [l.thick for l in self.struct]
         if self.freq_range is None:
             self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
+        if np.isclose(theta0, np.pi/2):
+            raise ValueError('Incident angle is too close to pi/2. '\
+                             'Maximum allowed angle is '\
+                             '89.999 degrees ~= 1.5707788735023767 radians.')
         self.incident_angle = theta0
         self.pol = pol
 

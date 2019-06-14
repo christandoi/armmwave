@@ -120,10 +120,6 @@ def t_power(t_amp, index_i, index_f, theta_i, theta_f):
     theta_f : float
         The angle of incidence (radians) at the final interface.
     """
-    if np.isclose(theta_i, np.pi/2):
-        raise ValueError('Incident angle is too close to pi/2. '\
-                         'Maximum allowed angle is '\
-                         '89.999 degrees ~= 1.5707788735023767 radians.')
     return np.abs(t_amp**2) * \
            ( (index_f * np.cos(theta_f)) / (index_i * np.cos(theta_i) ) )
 
@@ -149,10 +145,6 @@ def r_interface(index1, index2, theta1, theta2, pol):
     reflected amplitude : float
         The amplitude of the reflected power
     """
-    if np.isclose(theta1, np.pi/2):
-        raise ValueError('Incident angle is too close to pi/2. '\
-                         'Maximum allowed angle is '\
-                         '89.999 degrees ~= 1.5707788735023767 radians.')
     if pol == 's':
         numerator = (index1 * np.cos(theta1) - index2 * np.cos(theta2))
         denominator = (index1 * np.cos(theta1) + index2 * np.cos(theta2))
@@ -377,12 +369,6 @@ def refract(n, theta0):
     """
     Calculate the angle by which an incident ray is refracted
     """
-    if np.isclose(np.abs(theta0), np.pi/2):
-        raise NotImplementedError('Incident angle is too close to pi/2. '\
-                                  'Maximum allowed angle is '\
-                                  '89.999 degrees ~= 1.5707788735023767 radians. '\
-                                  'Use caution when interpreting results '\
-                                  'from such extreme incident angles.')
     # Make a nice pairwise generator so we can avoid playing games with
     # index counting
     thetas = [theta0]
