@@ -22,14 +22,10 @@ class Model:
         self._sim_params = None
         self._sim_results = None
 
-    def set_freq_range(self, low_freq, high_freq, nsample=1000):
+    def set_freq_range(self, freq1, freq2, nsample=1000):
         """
         Set the frequency range over which the model's response will be
         calculated.
-
-        Note: Due to the vagaries of floating point arithmetic,
-        specifying a `resolution` will yield an approximate resolution
-        and not the exact one passed to the function. MIGHTFIX
 
         Arguments
         ---------
@@ -39,15 +35,15 @@ class Model:
         """
         if nsample <= 0:
             raise ValueError('nsample must be a positive number')
-        self.low_freq = low_freq
-        self.high_freq = high_freq
-        if low_freq == high_freq:
-            self.freq_range = np.array([low_freq])
+        self.low_freq = min(freq1, freq2)
+        self.high_freq = max(freq1, freq2)
+        if freq1 == freq2:
+            self.freq_range = np.array([freq1])
         else:
-            self.freq_range = np.linspace(low_freq, high_freq, num=nsample)
+            self.freq_range = np.linspace(freq1, freq2, num=nsample)
         return self.freq_range
 
-    def set_angle_range(self, low_angle, high_angle, nsample=1000, resolution=0):
+    def set_angle_range(self, angle1, angle2, nsample=50):
         """ Will implement once pi/2 is handled well """
         raise NotImplementedError('Coming soon! Maybe!')
 
@@ -101,7 +97,7 @@ class Model:
         self.tands = [l.tand for l in self.struct]
         self.thicks = [l.thick for l in self.struct]
         if self.freq_range is None:
-            self.set_freq_range(low_freq=low_freq, high_freq=high_freq)
+            self.set_freq_range(freq1=low_freq, freq2=high_freq)
         if np.isclose(theta0, np.pi/2):
             raise ValueError('Incident angle is too close to pi/2. '\
                              'Maximum allowed angle is '\
