@@ -93,14 +93,9 @@ class Model:
         self.halpern_layers = {}
         for index, l in enumerate(self.struct):
             if l.desc != 'Source layer' and l.desc != 'Terminator layer':
-                 try:
-                     if isinstance(l.halperna, float) and isinstance(l.halpernb, float):
-                         self.halpern_layers[index] = {'a':l.halperna, 'b':l.halpernb,
-                                                       'n':l.rind}
-                 except AttributeError:
-                     print('No Halpern coefficient found in {}'.format(l))
-                     print('You shouldn\'t have made it here. How weird!')
-                     sys.exit(1)
+                if isinstance(l.halperna, float) and isinstance(l.halpernb, float):
+                    self.halpern_layers[index] = {'a':l.halperna, 'b':l.halpernb,
+                                                  'n':l.rind}
 
         self.rinds = [l.rind for l in self.struct]
         self.tands = [l.tand for l in self.struct]
