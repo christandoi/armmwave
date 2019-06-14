@@ -1,8 +1,5 @@
 """
-Contains the main transmission/reflection calculation bits
-
-TODO
-  * Fix the behavior of trig functions in the vicinity of pi/2
+Contains the main transmittance/reflectance calculation bits
 """
 
 import numpy as np
