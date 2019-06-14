@@ -97,5 +97,10 @@ class _Void(BaseLayer):
         self.thick = np.inf
         self.desc = 'THE VOID'
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.thick == other.thick and self.desc == 'THE VOID'
+        return False
+
     def __repr__(self):
         return 'There is nothing but {}'.format(self.desc)
