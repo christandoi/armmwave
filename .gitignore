@@ -6,6 +6,6 @@ plots
 *.bak
 build
 dist
-armm.egg-info
+armmwave.egg-info
 .installed_files.txt
 .coverage
