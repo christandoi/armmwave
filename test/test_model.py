@@ -8,8 +8,8 @@ import os
 import pytest
 import numpy as np
 import numpy.testing as npt
-from armm import model
-from armm import layer
+from armmwave import model
+from armmwave import layer
 
 TEST_DIR_LOC = 'test'
 OUTPUT_LOC = os.path.join('{}'.format(TEST_DIR_LOC), 'pytest_armm_output')

@@ -5,7 +5,7 @@ Contains tests for the core.py module.
 import pytest
 import numpy as np
 import numpy.testing as npt
-from armm import core
+from armmwave import core
 
 @pytest.mark.parametrize('test_n, test_delta, test_theta, expected_r, expected_t',
     [(np.array([1., 1., 1.]), np.array([0., 0., 0.]), np.array([0., 0., 0.]),

@@ -4,8 +4,8 @@ of `Layer` objects.
 """
 import sys
 import numpy as np
-import armm.layer
-import armm.core
+import armmwave.layer
+import armmwave.core
 
 class Model:
     def __init__(self):
@@ -63,9 +63,9 @@ class Model:
         if len(layers) < 3:
             raise IndexError('Must pass a Source layer, at least one material '
                              'layer, and a Terminator layer.')
-        if not isinstance(layers[0], armm.layer.Source):
+        if not isinstance(layers[0], armmwave.layer.Source):
             raise TypeError('The first layer must be a Source layer.')
-        if not isinstance(layers[-1], armm.layer.Terminator):
+        if not isinstance(layers[-1], armmwave.layer.Terminator):
             raise TypeError('The last layer must be a Terminator layer.')
 
         self.struct = layers
@@ -171,7 +171,7 @@ class Model:
         except AssertionError:
             raise KeyError('Did not find calculation-ready parameters. '
                            'Must call `set_up()` before calling `run()`')
-        results = armm.core.main(self._sim_params)
+        results = armmwave.core.main(self._sim_params)
         self._sim_results = results
         return results
 

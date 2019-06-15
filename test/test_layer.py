@@ -5,7 +5,7 @@ inherit from it.
 
 import pytest
 import numpy as np
-from armm import layer
+from armmwave import layer
 
 @pytest.mark.parametrize('test_l, expected', [
     (layer.BaseLayer(), ['Basic layer', 1., 0., 1.]),

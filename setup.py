@@ -9,16 +9,16 @@ with open('requirements.txt', 'r') as f:
     install_reqs = f.read().splitlines()
 
 setup(
-    name='armm',
-    version='0.0a7',
+    name='armmwave',
+    version='0.0a1',
     author='Andrew Nadolski',
     author_email='andrew.nadolski@gmail.com',
-    description='Calculate mm-wave transmittance and reflectance of materials.',
+    description='Calculate mm-wave transmittance and reflectance of materials',
     long_description=long_desc,
     long_description_content_type='text/markdown',
     platforms=['Linux', 'MacOS X'],
-    url='https://github.com/anadolski/armm',
-    install_requires=install_req,
+    url='https://github.com/anadolski/armmwave',
+    install_requires=install_reqs,
     python_requires='>=3.6',
     package_dir={'armm': 'armm'},
     packages=['armm'],
