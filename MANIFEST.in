@@ -1,6 +1,6 @@
 include LICENSE MANIFEST.in PKG-INFO
 include setup.py
 include requirements.txt
-recursive-include armm *.py
+recursive-include armmwave *.py
 recursive-include tests *.py *.dat
 exclude *pyc
