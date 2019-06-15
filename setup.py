@@ -19,7 +19,7 @@ setup(
     platforms=['Linux', 'MacOS X'],
     url='https://github.com/anadolski/armmwave',
     install_requires=install_reqs,
-    python_requires='>=3.5',
+    python_requires='>=3.4',
     package_dir={'armmwave': 'armmwave'},
     packages=['armmwave'],
     tests_require=['pytest'],
