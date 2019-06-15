@@ -2,3 +2,10 @@
 __pycache__
 debug
 plots
+*.sh
+*.bak
+build
+dist
+armm.egg-info
+.installed_files.txt
+.coverage
