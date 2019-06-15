@@ -20,8 +20,8 @@ setup(
     url='https://github.com/anadolski/armmwave',
     install_requires=install_reqs,
     python_requires='>=3.6',
-    package_dir={'armm': 'armm'},
-    packages=['armm'],
+    package_dir={'armmwave': 'armmwave'},
+    packages=['armmwave'],
     tests_require=['pytest'],
     license='MIT',
     classifiers=[
