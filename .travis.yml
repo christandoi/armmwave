@@ -1,0 +1,70 @@
+language: python
+python:
+  - 3.5
+  - 3.6
+os:
+  - linux
+branches:
+  only:
+    - master
+    - dev
+
+before_install:
+  - |
+    if [[ -n "$PYTHON" ]]; then
+      echo Installing Python using conda...;
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        MINICONDA_OS=Linux; else MINICONDA_OS=MacOSX;
+      fi
+      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
+      bash miniconda.sh -b -p $HOME/miniconda
+      export PATH="$HOME/miniconda/bin:$PATH"
+      hash -r
+      conda config --set always_yes yes --set changeps1 no
+      conda update -q conda
+      conda create -q -n test-environment python=$PYTHON
+      source activate test-environment
+      conda install -q conda-build
+      conda info -a
+    fi
+
+install:
+  - |
+    # do some pip setup
+    pip install --upgrade pip
+    pip install --upgrade pytest
+    pip install --upgrade pytest-cov
+    pip install --upgrade coverage
+    pip install --upgrade setuptools
+    pip install --upgrade wheel
+    pip install --upgrade codecov
+    # install from source dist
+    #python setup.py sdist
+    #pip install --verbose dist/*.tar.gz
+    pip install --verbose -e .
+
+script:
+  - |
+    pytest --cov=armm
+
+jobs:
+  include:
+    # tests
+    - stage: test
+      os: linux
+      python: 3.7
+      dist: xenial
+    - os: osx
+      language: generic
+      python: 3.5
+      env: PYTHON=3.5
+    - os: osx
+      language: generic
+      python: 3.6
+      env: PYTHON=3.6
+    - os: osx
+      language: generic
+      env: PYTHON=3.7
+
+after_success:
+  - codecov
