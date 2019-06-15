@@ -3,3 +3,4 @@ include setup.py
 include requirements.txt
 recursive-include armm *.py
 recursive-include tests *.py *.dat
+exclude *pyc
