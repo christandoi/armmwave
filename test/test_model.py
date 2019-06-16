@@ -156,8 +156,8 @@ def test_run():
     test_m = model.Model()
     test_m.set_up(layers)
     results = test_m.run()
-    npt.assert_allclose(results['transmission'], np.ones(results['transmission'].size))
-    npt.assert_allclose(results['reflection'], np.zeros(results['reflection'].size))
+    npt.assert_allclose(results['transmittance'], np.ones(results['transmittance'].size))
+    npt.assert_allclose(results['reflectance'], np.zeros(results['reflectance'].size))
 
 def test_run_halpern():
     """
@@ -168,8 +168,8 @@ def test_run_halpern():
     test_m = model.Model()
     test_m.set_up(layers)
     results = test_m.run()
-    npt.assert_allclose(results['transmission'], np.ones(results['transmission'].size))
-    npt.assert_allclose(results['reflection'], np.zeros(results['reflection'].size))
+    npt.assert_allclose(results['transmittance'], np.ones(results['transmittance'].size))
+    npt.assert_allclose(results['reflectance'], np.zeros(results['reflectance'].size))
 
 def test_save():
     """

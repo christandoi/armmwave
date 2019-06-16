@@ -420,5 +420,5 @@ def main(params):
     ts = np.asarray(ts)
     rs = np.asarray(rs)
 
-    results = {'frequency':freq, 'transmission':ts, 'reflection':rs}
+    results = {'frequency':freq, 'transmittance':ts, 'reflectance':rs}
     return results

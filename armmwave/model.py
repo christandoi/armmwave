@@ -181,8 +181,8 @@ class Model:
         including a header describing the sinulation parameters.
         """
         fs = self._sim_results['frequency']
-        rs = self._sim_results['reflection']
-        ts = self._sim_results['transmission']
+        rs = self._sim_results['reflectance']
+        ts = self._sim_results['transmittance']
 
         header = [
             'Structure: {}'.format(self.struct),
@@ -194,7 +194,7 @@ class Model:
             'Loss tangents: {}'.format(self.tands),
             'Thicknesses (m): {}'.format(self.thicks),
             '\n',
-            'Frequency\t\t\tTransmission\t\t\tReflection',]
+            'Frequency\t\t\tTransmittance\t\t\tReflectance',]
 
         np.savetxt(dest, np.c_[fs, ts, rs], delimiter='\t',
                     header='\n'.join(header))
