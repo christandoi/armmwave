@@ -208,33 +208,6 @@ def wavenumber(freq, index, tand, theta):
     k = 2 * np.pi * (freq / 3e8) * np.cos(theta) * index * np.sqrt(1 + 1j * tand)
     return k
 
-#def wavenumber_comp(freq, index, tand, theta):
-#    """
-#    Calculate the complex wavenumber of a wave in a material.
-#    This function is extraneous for now. Please ignore.
-#
-#    Arguments
-#    ---------
-#    freq : float
-#        The frequency at which to calculate the wavevector, k
-#    tand : array
-#        An array of loss tangents, ordered from source to terminating
-#    index : array
-#        An array of refractive indices, ordered from source to
-#        terminating layer
-#    theta : array
-#        An array of angles (radians)
-#
-#    Returns
-#    -------
-#    k : array
-#        The complex wavenumber, k
-#    """
-#    extinc_coeff = tand*index/2
-#    comp_index = index + 1j*extinc_coeff
-#    k = (2*np.pi*comp_index*freq*np.cos(theta)/3e8)
-#    return k
-
 def alpha2imagn(freq, a, b, n):
     """
     Convert Halpern's 'a' and 'b' from an absorption coefficient
