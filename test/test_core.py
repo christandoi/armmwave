@@ -136,17 +136,30 @@ def test_t_interface(test_input, test_pol, expected):
     npt.assert_allclose(core.t_interface(n[0], n[1], angle[0], angle[1],
                         pol), expected)
 
-@pytest.mark.parametrize('test_freq, test_n, test_tand, test_angle, expected',
-    [(100., 1., 0., 0., 2.0943951023931953e-06 + 0j),
-     (100., 2., 0.05, 0.52359878, 3.628731468587418e-06 + 9.066165854860358e-08j),
+@pytest.mark.parametrize('test_freq, test_n, test_tand, expected',
+    [(100., 1., 0., 2.0943951023931953e-06 + 0j),
+     (100., 2., 0.05, 4.19009818e-06 + 1.046870659e-07j),
     ])
-def test_wavenumber(test_freq, test_n, test_tand, test_angle, expected):
+def test_wavenumber(test_freq, test_n, test_tand, expected):
     """
-    Check the wavenumber at normal incidence and 30 deg incidence. Check
-    an absorptive medium and a non-absorptive medium.
+    Check the wavenumber for an absorptive medium and a non-absorptive
+    medium.
     """
-    npt.assert_allclose(core.wavenumber(test_freq, test_n, test_tand, test_angle),
+    npt.assert_allclose(core.wavenumber(test_freq, test_n, test_tand),
                         expected)
+
+@pytest.mark.parametrize('test_k, test_d, test_angle, expected',
+    [(np.array([1e8, 15e-6, 1e8]), np.array([np.inf, 100, np.inf]), 0.,
+      np.array([np.inf, 15e-4, np.inf])),
+     (np.array([1e8, 15e-6, 1e8]), np.array([np.inf, 100, np.inf]), 0.52359878,
+      np.array([np.inf, 0.0012990381, np.inf])),
+    ])
+def test_prop_wavenumber(test_k, test_d, test_angle, expected):
+    """
+    Check that we can multiply and get infinite boundaries without raising
+    errors through scipy.
+    """
+    npt.assert_allclose(core.prop_wavenumber(test_k, test_d, test_angle), expected)
 
 @pytest.mark.parametrize('test_freq, test_a, test_b, test_n, expected',
     [(100., 0., 0., 1., 0.),
@@ -180,17 +193,6 @@ def test_make_2x2(test_a11, test_a12, test_a21, test_a22, expected):
     """Check that array elements wind up in the correct places"""
     npt.assert_equal(core.make_2x2(test_a11, test_a12, test_a21, test_a22),
                      expected)
-
-@pytest.mark.parametrize('test_k, test_d, expected',
-    [(np.array([1e8, 15e-6, 1e8]), np.array([np.inf, 100, np.inf]),
-      np.array([np.inf, 15e-4, np.inf])),
-    ])
-def test_prop_wavenumber(test_k, test_d, expected):
-    """
-    Check that we can multiply and get infinite boundaries without raising
-    errors through scipy.
-    """
-    npt.assert_allclose(core.prop_wavenumber(test_k, test_d), expected)
 
 @pytest.mark.parametrize('test_n, test_theta0, expected',
     [(np.array([1., 1.5, 1.]), 0., np.array([0, 0, 0])),

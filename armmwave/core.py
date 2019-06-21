@@ -184,7 +184,7 @@ def t_interface(index1, index2, theta1, theta2, pol):
         raise ValueError("Polarization must be 's' or 'p'")
     return numerator / denominator
 
-def wavenumber(freq, index, tand, theta):
+def wavenumber(freq, index, tand):
     """
     Calculate the wavenumber in a material.
 
@@ -197,15 +197,13 @@ def wavenumber(freq, index, tand, theta):
     index : array
         An array of refractive indices, ordered from source to
         terminating layer
-    theta : array
-        An array of angles (radians)
 
     Returns
     -------
     k : array
         The complex wavenumber, k
     """
-    k = 2 * np.pi * (freq / 3e8) * np.cos(theta) * index * np.sqrt(1 + 1j * tand)
+    k = 2 * np.pi * (freq / 3e8) * index * np.sqrt(1 + 1j * tand)
     return k
 
 def alpha2imagn(freq, a, b, n):
@@ -308,7 +306,7 @@ def make_2x2(a11, a12, a21, a22, dtype=float):
     array[1, 1] = a22
     return array
 
-def prop_wavenumber(k, d):
+def prop_wavenumber(k, d, theta):
     """
     Calculate the wavenumber offset, delta.
 
@@ -322,6 +320,8 @@ def prop_wavenumber(k, d):
     d : array
         An array of distances (thicknesses), ordered from source to
         terminating layer
+    theta : float
+        The angle the wave passes through the medium
 
     Returns
     -------
@@ -330,7 +330,7 @@ def prop_wavenumber(k, d):
     """
     # Turn off 'invalid multiplication' error; it's just the 'inf' boundaries
     olderr = sp.seterr(invalid='ignore')
-    delta = k * d
+    delta = k * d * np.cos(theta)
     # Now turn the error back on
     sp.seterr(**olderr)
     return delta
@@ -382,8 +382,8 @@ def main(params):
     for f in freq:
         if len(halps.keys()) > 0:
             tand = replace_tand(f, tand, halps)
-        ks = wavenumber(f, rind, tand, theta)
-        delta = prop_wavenumber(ks, thick)
+        ks = wavenumber(f, rind, tand)
+        delta = prop_wavenumber(ks, thick, theta)
         r_amp, t_amp = rt_amp(rind, delta, theta, pol)
         t_pow = t_power(t_amp, rind[0], rind[-1], theta[0], theta[-1])
         r_pow = r_power(r_amp)
