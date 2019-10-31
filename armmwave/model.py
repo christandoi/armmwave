@@ -8,8 +8,7 @@ import armmwave.layer
 import armmwave.core
 
 class Model:
-    """
-    The `Model` class is the framework used to assemble the simulation
+    """The `Model` class is the framework used to assemble the simulation
     `Layer`s. It serves as an entry-point to the main calculation.
 
     Parameters
@@ -80,8 +79,7 @@ class Model:
         self._sim_results = None
 
     def set_freq_range(self, freq1, freq2, nsample=1000):
-        """
-        Set `self.freq_range`, the frequency range over which the model's
+        """Set `self.freq_range`, the frequency range over which the model's
         response will be calculated.
 
         Parameters
@@ -115,8 +113,7 @@ class Model:
         raise NotImplementedError('Coming soon! Maybe!')
 
     def set_up(self, layers, low_freq=500e6, high_freq=500e9, theta0=0., pol='s'):
-        """
-        Convenience function to get all the model bits and pieces in one
+        """Convenience function to get all the model bits and pieces in one
         place. Call this before calling `run()`.
 
         Parameters
@@ -194,8 +191,7 @@ class Model:
 
     def _set_up_sim(self, rinds, tands, thicks, freq_range, theta0, pol,
                     halpern_layers):
-        """
-        Ensure the user-supplied parameters are in a form that the core
+        """Ensure the user-supplied parameters are in a form that the core
         calculation functions expect.
 
         It is not recommended to call this function directly. Call
@@ -234,8 +230,7 @@ class Model:
         return
 
     def run(self):
-        """
-        Calculate transmittance and reflectance for the given model.
+        """Calculate transmittance and reflectance for the given model.
 
         This function is the primary entry-point to the main calculations.
 
@@ -260,8 +255,7 @@ class Model:
         return results
 
     def save(self, dest):
-        """
-        Write transmittance and reflectance calculation results to a file,
+        """Write transmittance and reflectance calculation results to a file,
         including a header describing the simulation parameters.
         """
         fs = self._sim_results['frequency']

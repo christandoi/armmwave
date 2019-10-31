@@ -10,8 +10,7 @@ import numpy as np
 import scipy as sp
 
 def rt_amp(index, delta, theta, pol):
-    """
-    Calculate the reflected and transmitted amplitudes through the
+    """Calculate the reflected and transmitted amplitudes through the
     system.
 
     Parameters
@@ -47,8 +46,7 @@ def rt_amp(index, delta, theta, pol):
     return ref_amp, trans_amp
 
 def make_rt_amp_matrix(index, theta, pol):
-    """
-    Construct reflection and transmission amplitude matrices.
+    """Construct reflection and transmission amplitude matrices.
 
     Parameters
     ----------
@@ -73,8 +71,7 @@ def make_rt_amp_matrix(index, theta, pol):
     return t_mat, r_mat
 
 def make_m_matrix(index, t_matrix, r_matrix, delta):
-    """
-    Construct the characteristic matrix of the model.
+    """Construct the characteristic matrix of the model.
 
     Parameters
     ----------
@@ -102,8 +99,7 @@ def make_m_matrix(index, t_matrix, r_matrix, delta):
     return m_mat
 
 def r_power(r_amp):
-    """
-    Return the fraction of reflected power.
+    """Return the fraction of reflected power.
 
     Parameters
     ----------
@@ -119,8 +115,7 @@ def r_power(r_amp):
     return np.abs(r_amp)**2
 
 def t_power(t_amp, index_i, index_f, theta_i, theta_f):
-    """
-    Return the fraction of transmitted power.
+    """Return the fraction of transmitted power.
 
     Parameters
     ----------
@@ -145,8 +140,7 @@ def t_power(t_amp, index_i, index_f, theta_i, theta_f):
            ( (index_f * np.cos(theta_f)) / (index_i * np.cos(theta_i) ) )
 
 def r_interface(index1, index2, theta1, theta2, pol):
-    """
-    Calculate the reflected amplitude at an interface.
+    """Calculate the reflected amplitude at an interface.
 
     Parameters
     ----------
@@ -177,8 +171,7 @@ def r_interface(index1, index2, theta1, theta2, pol):
     return numerator / denominator
 
 def t_interface(index1, index2, theta1, theta2, pol):
-    """
-    Calculate the transmission amplitude at an interface.
+    """Calculate the transmission amplitude at an interface.
 
     Parameters
     ----------
@@ -209,8 +202,7 @@ def t_interface(index1, index2, theta1, theta2, pol):
     return numerator / denominator
 
 def wavenumber(freq, index, tand):
-    """
-    Calculate the wavenumber in a material.
+    """Calculate the wavenumber in a material.
 
     Parameters
     ----------
@@ -231,8 +223,7 @@ def wavenumber(freq, index, tand):
     return k
 
 def alpha2imagn(freq, a, b, n):
-    """
-    Convert Halpern's 'a' and 'b' from an absorption coefficient
+    """Convert Halpern's 'a' and 'b' from an absorption coefficient
     of the form `a*freq**b` to a (frequency-dependent) .
 
     Parameters
@@ -268,8 +259,7 @@ def alpha2imagn(freq, a, b, n):
     return imagn
 
 def alpha2tand(freq, a, b, n):
-    """
-    Convert Halpern's 'a' and 'b' from an absorption coefficient
+    """Convert Halpern's 'a' and 'b' from an absorption coefficient
     of the form `a*freq**b` to a (frequency-dependent) loss tangent.
 
     Parameters
@@ -308,10 +298,7 @@ def alpha2tand(freq, a, b, n):
 
 
 def make_2x2(a11, a12, a21, a22, dtype=float):
-    """
-    Return a 2x2 array quickly.
-
-    Thanks to Steve Byrnes for this one.
+    """Return a 2x2 array quickly.
 
     Parameters
     ----------
@@ -339,8 +326,7 @@ def make_2x2(a11, a12, a21, a22, dtype=float):
     return array
 
 def prop_wavenumber(k, d, theta):
-    """
-    Propagate the wave through a material and calculate its offset,
+    """Propagate the wave through a material and calculate its offset,
     delta.
 
     Parameters
@@ -366,8 +352,7 @@ def prop_wavenumber(k, d, theta):
     return delta
 
 def refract(n, theta0):
-    """
-    Calculate the angle by which an incident ray is refracted
+    """Calculate the angle by which an incident ray is refracted
 
     Parameters
     ----------
@@ -392,8 +377,7 @@ def refract(n, theta0):
     return np.asarray(thetas)
 
 def replace_tand(freq, tand_array, halpern_dict):
-    """
-    Calculate a frequency-dependent loss tangent from a material's
+    """Calculate a frequency-dependent loss tangent from a material's
     Halpern coefficiencts if they exist.
 
     Parameters
@@ -418,8 +402,7 @@ def replace_tand(freq, tand_array, halpern_dict):
     return tand_array
 
 def main(params):
-    """
-    Run a transmittance/reflectance calculation for the given parameters.
+    """Run a transmittance/reflectance calculation for the given parameters.
 
     This function is the primary entry-point to the calculation, and should
     not be called directly. Instead, call `Model.run()`.

@@ -9,8 +9,7 @@ import numpy as np
 
 
 class BaseLayer:
-    """
-    The `BaseLayer` class is the parent from which all other classes
+    """The `BaseLayer` class is the parent from which all other classes
     derive. Its purpose is to establish the bare-minimum attributes
     needed for a given layer.
 
@@ -54,8 +53,7 @@ class BaseLayer:
 
 
 class Layer(BaseLayer):
-    """
-    The `Layer` class is the primary class for model creation. Inherits
+    """The `Layer` class is the primary class for model creation. Inherits
     from `BaseLayer`.
 
     Parameters
@@ -89,8 +87,7 @@ class Layer(BaseLayer):
 
 
 class Source(BaseLayer):
-    """
-    The Source is required to be the first layer in the stack. Inherits
+    """The Source is required to be the first layer in the stack. Inherits
     from `BaseLayer`.
 
     The source may have any refractive index or loss tangent, but it is
@@ -111,8 +108,7 @@ class Source(BaseLayer):
 
 
 class Terminator(BaseLayer):
-    """
-    The Terminator is required to be the last layer in the stack. Inherits
+    """The Terminator is required to be the last layer in the stack. Inherits
     from `BaseLayer`.
 
     The Terminator layer may have any refractive index or loss tangent, but
