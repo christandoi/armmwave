@@ -10,7 +10,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='armmwave',
-    version='0.0a2',
+    version='0.1.0',
     author='Andrew Nadolski',
     author_email='andrew.nadolski@gmail.com',
     description='Calculate mm-wave transmittance and reflectance of materials',
@@ -29,6 +29,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         ],
     )
