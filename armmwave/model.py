@@ -1,6 +1,5 @@
 """
-Contains the methods and attributes of a `Model`, which is an assembly
-of `Layer` objects.
+Contains the methods and attributes of a ``Model``.
 """
 import sys
 import numpy as np
@@ -8,60 +7,48 @@ import armmwave.layer
 import armmwave.core
 
 class Model:
-    """The `Model` class is the framework used to assemble the simulation
-    `Layer`s. It serves as an entry-point to the main calculation.
-
-    Parameters
-    ----------
-    None
+    """The ``Model`` class is the framework used to assemble the simulation
+    ``Layer`` objects. It serves as an entry-point to the main calculation.
 
     Attributes
     ----------
     struct : list
-        A collection of `Layer` objects as assembled by the `set_up()`
+        A collection of ``Layer`` objects as assembled by the ``Model.set_up()``
         class method.
     low_freq : float
         The low-frequency (Hz) bound for the calculation. May be set directly or
-        through the `set_freq_range()` class method. Defaults to 500 MHz if
-        not set before `run()` is called.
+        through the ``Model.set_freq_range()`` class method. Defaults to 500 MHz
+        if not set before ``Model.run()`` is called.
     high_freq : float
         The high-frequency (Hz) bound for the calculation. May be set directly or
-        through the `set_freq_range()` class method. Defaults to 500 GHz if
-        not set before `run()` is called.
-    freq_range : list or numpy array
+        through the ``Model.set_freq_range()`` class method. Defaults to 500 GHz if
+        not set before ``Model.run()`` is called.
+    freq_range : array_like
         The frequencies (Hz) at which to run the calculation. Defaults to
         [500e6, 500e9] with 1000 evenly-spaced samples if not set before
-        `run()` is called.
-    pol : string
-        The target polarization, either 's' or 'p'. Defaults to 's' if not
-        set before `run()` is called.
+        ``Model.run()`` is called.
+    pol : str
+        The target polarization, either `s` or `p`. Defaults to `s` if not
+        set before ``Model.run()`` is called.
     incident_angle : float
         The initial angle (in radians; with respect to normal) at which the
-        wave should strike the model. Defaults to 0 if not set before `run()`
-        is called.
-    rinds : list or numpy array
-        A collection of refractive indices for each `Layer` in the model,
-        ordered from `Source` to `Terminator`.
-    tands : list or numpy array
-        A collection of loss tangents for each `Layer` in the model,
-        ordered from `Source` to `Terminator`.
+        wave should strike the model. Defaults to 0 if not set before
+        ``Model.run()`` is called.
+    rinds : array_like
+        A collection of refractive indices for each ``Layer`` in the model,
+        ordered from ``Layer.Source`` to ``Layer.Terminator``.
+    tands : array_like
+        A collection of loss tangents for each ``Layer`` in the model,
+        ordered from ``Layer.Source`` to ``Layer.Terminator``.
     halpern_layers : dict
-        A dictionary, keyed by `Layer` position (specifically, the index into
-        `tands`) containing Halpern 'a' and 'b' coefficients, if they exist.
+        A dictionary, keyed by ``Layer`` position (specifically, the index into
+        `tands`) containing Halpern `a` and `b` coefficients, if they exist.
         These coefficients are used to calculate a frequency-dependent loss
         term, and override the loss tangent for the corresponding layer.
-    thicks : list or numpy array
-        A collection of thicknesses (in meters) for each `Layer` in the model,
-        ordered from `Source` to `Terminator`.
+    thicks : array_like
+        A collection of thicknesses (in meters) for each ``Layer`` in the model,
+        ordered from ``Layer.Source`` to ``Layer.Terminator``.
 
-    Methods
-    -------
-    reset_model
-    run
-    save
-    set_freq_range
-    set_angle_range
-    set_up
     """
 
     def __init__(self):
@@ -79,17 +66,15 @@ class Model:
         self._sim_results = None
 
     def set_freq_range(self, freq1, freq2, nsample=1000):
-        """Set `self.freq_range`, the frequency range over which the model's
+        """Set ``Model.freq_range``, the frequency range over which the model's
         response will be calculated.
 
         Parameters
         ----------
         freq1 : float
-            Typically, the lower frequency bound (in Hz). However, you
-            may run the calculation from high to low frequency if you wish.
+            The lower frequency bound (in Hz).
         freq2 : float
-            Typically, the upper frequency bound (in Hz). However, you
-            may run the calculation from high to low frequency if you wish.
+            The upper frequency bound (in Hz).
         nsample : int, optional
             The number of evenly-spaced samples between `freq1` and `freq2`.
             Default is 1000.
@@ -97,6 +82,12 @@ class Model:
         Returns
         -------
         freq_range : numpy array
+
+        Raises
+        ------
+        ValueError
+            Raised if `nsample` < 0.
+
         """
         if nsample <= 0:
             raise ValueError('nsample must be a positive number')
@@ -109,19 +100,30 @@ class Model:
         return self.freq_range
 
     def set_angle_range(self, angle1, angle2, nsample=50):
-        """ Will implement once pi/2 is handled well """
+        """Not implemented.
+
+        Will implement once pi/2 is handled more carefully.
+
+        Raises
+        ------
+        NotImplementedError
+            This function is not implemented.
+        """
         raise NotImplementedError('Coming soon! Maybe!')
 
     def set_up(self, layers, low_freq=500e6, high_freq=500e9, theta0=0., pol='s'):
-        """Convenience function to get all the model bits and pieces in one
-        place. Call this before calling `run()`.
+        """Assemble the necessary model components.
+
+        This is a convenience function to get all the model bits and pieces
+        in one place. Call this before calling ``Model.run()``.
 
         Parameters
         ----------
         layers : list
-            A list containing `Layer` objects ordered from `Source` to
-            `Terminator`. Note that the `Source` and `Terminator` layers
-            should be the first and last entries of the list, respectively.
+            A list containing ``Layer`` objects ordered from ``Layer.Source``
+            to ``Layer.Terminator``. Note that the ``Layer.Source`` and
+            ``Layer.Terminator`` layers should be the first and last entries of
+            the list, respectively.
         low_freq : float, optional
             The lower frequency bound (in Hz). Default is 500e6 (500 MHz).
         high_freq : float, optional
@@ -129,9 +131,20 @@ class Model:
         theta0 : float, optional
             The initial angle (radians; with respect to normal) at which the
             wave should strike the model. Default is 0.
-        pol : string, optional
-            The target polarization for the calculation. Must be either 's',
-            or 'p'. Default is 's'.
+        pol : str, optional
+            The target polarization for the calculation. Must be either `s`,
+            or `p`. Default is `s`.
+
+        Raises
+        ------
+        IndexError
+            Raised if there are fewer than three ``Layer`` elements in the
+            ``Model``. There must be **at least** a ``Layer.Source``, a
+            user-defined ``Layer``, and a ``Layer.Terminator``.
+        TypeError
+            Raised if the first layer element is not a ``Layer.Source`` or the
+            final layer element is not a ``Layer.Terminator``.
+
         """
         # Check that the first and last layers are infinite boundaries
         # and that there is at least one intervening material
@@ -195,21 +208,22 @@ class Model:
         calculation functions expect.
 
         It is not recommended to call this function directly. Call
-        `Model().set_up()` instead.
+        ``Model().set_up()`` instead.
 
         Parameters
         ----------
-        rinds : list or numpy array
-        tands : list or numpy array
-        thicks : list or numpy array
-        freq_range : list or numpy array
+        rinds : array_like
+        tands : array_like
+        thicks : array_like
+        freq_range : array_like
         theta0 : float
-        pol : string
+        pol : str
         halpern_layers : dict
 
         Returns
         -------
         simargs : dict
+
         """
         sim_args = {'rind':rinds, 'tand':tands, 'thick':thicks, 'freq':freq_range}
 
@@ -224,7 +238,7 @@ class Model:
         return sim_args
 
     def reset_model(self):
-        """Reinitialize the `Model` with its default attribute values: `None`."""
+        """Reinitialize the ``Model`` with its default attribute values: `None`."""
         for key, val in self.__dict__.items():
             self.__dict__[key] = None
         return
@@ -239,11 +253,12 @@ class Model:
         results : dict
             A dictionary with three keys:
              * `frequency` : numpy array of frequencies corresponding
-               to 'T' and 'R'
-             * `transmittance` : numpy array of transmittances (T) for each
+               to `T` and `R`
+             * `transmittance` : numpy array of transmittances (`T`) for each
                frequency
-             * `reflectance` : numpy array of reflectances (R) for each
+             * `reflectance` : numpy array of reflectances (`R`) for each
                frequency
+
         """
         try:
             assert bool(self._sim_params)
@@ -255,8 +270,16 @@ class Model:
         return results
 
     def save(self, dest):
-        """Write transmittance and reflectance calculation results to a file,
-        including a header describing the simulation parameters.
+        """Write calculation results to a file.
+
+        Write the simulated transmittance and reflectance to a file at `dest`.
+        The output includes a header describing the simulation parameters.
+
+        Parameters
+        ----------
+        dest : str
+            The path to the output file.
+
         """
         fs = self._sim_results['frequency']
         rs = self._sim_results['reflectance']

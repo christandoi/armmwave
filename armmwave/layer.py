@@ -1,6 +1,6 @@
 """
-This module contains the attributes and methods of the `BaseLayer`
-class, as well as classes that inherit from it. Each `BaseLayer` has
+This module contains the attributes and methods of the ``BaseLayer``
+class, and classes that inherit from it. Each ``BaseLayer`` has
 some physical properties that we need to access (and possibly update)
 throughout our calculations.
 """
@@ -9,22 +9,22 @@ import numpy as np
 
 
 class BaseLayer:
-    """The `BaseLayer` class is the parent from which all other classes
+    """The ``BaseLayer`` class is the parent from which all other classes
     derive. Its purpose is to establish the bare-minimum attributes
     needed for a given layer.
 
-    Parameters
+    Attributes
     ----------
-    rind : float, optional
+    rind : float
         The refractive index of the layer. Default is 1.
-    thick : float, optional
+    thick : float
         The thickness of the layer (in meters). Default is 1.
-    tand : float, optional
+    tand : float
         The loss tangent of the layer. Default is 0---i.e., a lossless
         material.
-    desc : string, optional
+    desc : str
         A descriptive string for the layer. For example, the name of the
-        material. Default is 'Basic layer'
+        material. Default is 'Basic layer'.
     """
     def __init__(self, rind=1., thick=1., tand=0., desc='Basic layer'):
         self.rind = rind
@@ -36,25 +36,25 @@ class BaseLayer:
         return '{} (Basic layer)'.format(self.desc)
 
     def get_rind(self):
-        """Return the layer refractive index"""
+        """Return the layer refractive index."""
         return self.rind
 
     def get_thick(self):
-        """Return the layer thickness"""
+        """Return the layer thickness."""
         return self.thick
 
     def get_tand(self):
-        """Return the layer loss tangent"""
+        """Return the layer loss tangent."""
         return self.tand
 
     def get_desc(self):
-        """Return the layer description"""
+        """Return the layer description."""
         return self.desc
 
 
 class Layer(BaseLayer):
-    """The `Layer` class is the primary class for model creation. Inherits
-    from `BaseLayer`.
+    """The ``Layer`` class is the primary class for model creation. Inherits
+    from ``BaseLayer``.
 
     Parameters
     ----------
@@ -66,14 +66,14 @@ class Layer(BaseLayer):
         The loss tangent of the layer. Default is 0---i.e., a lossless
         material.
     halperna : float, optional
-        The Halpern "a" coefficient, used to caclulate a frequency-dependent
+        The Halpern `a` coefficient, used to caclulate a frequency-dependent
         loss tangent term. Default is `None`, which corresponds to a constant
         loss term.
     halpernb : float, optional
-        The Halpern "b" coefficient, used to caclulate a frequency-dependent
+        The Halpern `b` coefficient, used to caclulate a frequency-dependent
         loss tangent term. Default is `None`, which corresponds to a constant
         loss term.
-    desc : string, optional
+    desc : str, optional
         A descriptive string for the layer. For example, the name of the
         material. Default is 'Basic layer'
     """
@@ -87,8 +87,8 @@ class Layer(BaseLayer):
 
 
 class Source(BaseLayer):
-    """The Source is required to be the first layer in the stack. Inherits
-    from `BaseLayer`.
+    """The ``Source`` is required to be the first layer in the stack. Inherits
+    from ``BaseLayer``.
 
     The source may have any refractive index or loss tangent, but it is
     required to have infinite thickness.
@@ -108,15 +108,15 @@ class Source(BaseLayer):
 
 
 class Terminator(BaseLayer):
-    """The Terminator is required to be the last layer in the stack. Inherits
-    from `BaseLayer`.
+    """The ``Terminator`` is required to be the last layer in the stack.
+    Inherits from ``BaseLayer``.
 
-    The Terminator layer may have any refractive index or loss tangent, but
+    The ``Terminator`` may have any refractive index or loss tangent, but
     it must have infinite thickness. As a convenience, the Terminator layer
     may be instantiated with the `vac` flag, where the default is `vac ==
-    True`. `True` sets the refractive index of the Terminator to 1, and its
+    True`. `True` sets the refractive index of the ``Terminator`` to 1, and its
     attenuation to 0. `False` matches refractive index of previous
-    layer, again setting the Terminator's attenuation to zero.
+    layer, again setting the ``Terminator`` attenuation to zero.
     """
     def __init__(self, vac=True, **kwargs):
         super().__init__(**kwargs)
