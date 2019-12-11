@@ -4,7 +4,7 @@ Status](https://travis-ci.org/anadolski/armmwave.svg?branch=master)](https://tra
 ![PyPI](https://img.shields.io/pypi/v/armmwave.svg)
 ![PyPI - License](https://img.shields.io/pypi/l/armmwave.svg)
 # armmwave
-Code that calculates transmittace and reflectance of materials at millimeter 
+Code that calculates transmittance and reflectance of materials at millimeter 
 wavelengths.
 
 This software was developed to aid in development of anti-reflection coatings 
