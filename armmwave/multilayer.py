@@ -1,4 +1,4 @@
-#CHRIS TANDOI - JANUARY 26, 2020
+#CHRIS TANDOI - JANUARY 28, 2020
 #   this script is for simulating multiple layers of anti reflective coating
 #   and also to plot different things based on this data
 #
@@ -13,11 +13,10 @@
 ####
 
 import os
-import operator
+import matplotlib.pyplot as plt
 import armmwave.layer as awl
 import armmwave.model as awm
 import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 #aesthetics - https://xkcd.com/color/rgb/
@@ -34,17 +33,21 @@ c5 = sns.xkcd_rgb["brownish grey"]
 #set the broadband frequency range for plotting
 #(here is 10GHz to 400GHz)
 frequencies = np.linspace(10, 400, 1000)
-#and the frequency range we're interested in transmission for
-#(here is 30/40GHz +/- 15%)
-transfreqlow = 30e9*.85
-transfreqhigh = 40e9*1.15
+#and the frequency range in GHz we're interested in transmission for
+transfreqlow = 220
+transfreqhigh = 270
+#don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz
+adjtransfreqlow = transfreqlow*(10**9)*.85
+adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 
 #define your AR layers
-zitex = awl.Layer(rind=1.2, tand=9e-4, thick=3.81e-4, desc='Zitex')
-porex = awl.Layer(rind=1.319, tand=9e-4, thick=3.81e-4, desc='Porex')
-ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=1.27e-4, desc='RO3003')
-ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=1.27e-4, desc='RO3035')
-ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=1.27e-4, desc='RO3006')
+mil = 2.54e-5 #converting 1 thousandth of an inch to meters
+zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
+porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
+ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
+ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
+ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
+porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex8mil') #porex is arbitrary thickness
 
 #specify a bonding layer
 ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=2.54e-5, desc='LDPE')
@@ -91,19 +94,19 @@ def arc_crunch(mat1, mat2, mat3, layers):
     for i in range(layers+1):
         for j in range(layers+1):
             for k in range(layers+1):
-                mat1_mat2_mat3.append(arc(mat1, i, mat2, j, mat3, k, transfreqlow, transfreqhigh)['transmittance'])
+                mat1_mat2_mat3.append(arc(mat1, i, mat2, j, mat3, k, adjtransfreqlow, adjtransfreqhigh)['transmittance'])
                 print(f'{i} {j} {k}')
     return mat1_mat2_mat3
 
-#crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more
-#than once. can save time on lots of layers
-def crunchNsave(mat1, mat2, mat3, layers):
-    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}'), arc_crunch(mat1, mat2, mat3, layers))
+#crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
+#note: only crunches for the frequency band you're interested in (e.g. 30/40 or 220/270) that you specify at the top
+def crunchNsave(mat1, mat2, mat3, layers=4):
+    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}'), arc_crunch(mat1, mat2, mat3, layers))
 
 #inverse of crunchNsave: loads your saved crunch to a variable that you can call for
 #analysis later
-def loadmydata(mat1, mat2, mat3, layers):
-    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}.npy')))
+def loadmydata(mat1, mat2, mat3, layers=4):
+    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}.npy')))
 
 #statistics setup for analysis
 def arc_stats(crunched_model):
@@ -113,11 +116,11 @@ def arc_stats(crunched_model):
     return stddev, mean, location
 
 #plotting function to include label
-def quickplot(mat1, amount1, mat2, amount2, mat3, amount3, freqlow, freqhigh, linestyle):
+def quickplot(mat1, amount1, mat2, amount2, mat3, amount3, freqlow=10e9, freqhigh=400e9, ls='-'):
     broadband = arc(mat1, amount1, mat2, amount2, mat3, amount3, freqlow, freqhigh)['transmittance']
-    crunchrange = arc(mat1, amount1, mat2, amount2, mat3, amount3, transfreqlow, transfreqhigh)['transmittance']
-    label = f'{round(amount1 * mat1.thick * 39370)}mil {mat1.desc}, {round(amount2 * mat2.thick * 39370)}mil {mat2.desc}, {round(amount3 * mat3.thick * 39370)}mil {mat3.desc}, {round(np.mean(data)*100, 2)}% mean transmission'
-    return plt.plot(frequencies, broadband, label=label, ls=linestyle)
+    crunchrange = arc(mat1, amount1, mat2, amount2, mat3, amount3, adjtransfreqlow, adjtransfreqhigh)['transmittance']
+    label = f'{round(amount1 * mat1.thick * 39370)}mil {mat1.desc}, {round(amount2 * mat2.thick * 39370)}mil {mat2.desc}, {round(amount3 * mat3.thick * 39370)}mil {mat3.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
+    return plt.plot(frequencies, broadband, label=label, linestyle=ls)
 
 #arc crunch for only single layer of material
 def arcsingle(material, amountoflayers, freqlow, freqhigh):
@@ -137,83 +140,31 @@ def arcsingle(material, amountoflayers, freqlow, freqhigh):
 #crunchrange is the specific brand we care about (here: 30/40GHz)
 def quicksingle(mat, amount, freqlow=10e9, freqhigh=400e9, ls='-'):
     broadband = arcsingle(mat, amount, freqlow, freqhigh)['transmittance']
-    crunchrange = arcsingle(mat, amount, transfreqlow, transfreqhigh)['transmittance']
+    crunchrange = arcsingle(mat, amount, adjtransfreqlow, adjtransfreqhigh)['transmittance']
     label = f'{round(amount * mat.thick * 39370)}mil {mat.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
     return plt.plot(frequencies, broadband, label=label, linestyle=ls)
 
-#for plotting many configurations from a crunchNsave file and finding out the mean values from all of them
+#for plotting the maximum mean transmission value for each combination of layers
+#i.e.: best transmission at 1 layer of material, 2 layers, 3 layers, 4, 5, 6, etc.
 def multimean(mat1, mat2, mat3, layers):
     file = loadmydata(mat1, mat2, mat3, layers)
     mean = arc_stats(file)[1]
     location = arc_stats(file)[2]
-    label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}'
     base5loc = []
-    #convert location to base 5 for actual amount of layer values
+    #convert location to base 5 (or however many layers you choose, just adjust) for actual amount of layer values
     for place in location:
         base5loc.append(np.base_repr(place,5))
-    #add up each amount layers (i.e. 305 = 3 + 0 + 5 = 8)
+    #add up each amount layers (i.e. 304 = 3 + 0 + 4 = 7)
     total_layers = []
     for amountoflayers in base5loc:
         total_layers.append(sum(int(x) for x in amountoflayers))
-    total_layers_dict = dict(zip(mean, total_layers))
-    plotting = plt.scatter(total_layers, mean, label=label, alpha=0.5)
+    # total_layers_dict = dict(zip(mean, total_layers))
+    max_pos = mean.index(max(mean))
+    label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[max_pos]}'
+    plotting = plt.scatter(total_layers[max_pos], mean[max_pos], label=label, alpha=0.5)
     return plotting
 
-#placeholder for annotation function
-def annotation(file):
-    for i in arc_stats(ro3006_ro3003_zitex)[2]:
-        plt.annotate(np.base_repr(i,5), (arc_stats(ro3006_ro3003_zitex)[0][i], arc_stats(ro3006_ro3003_zitex)[1][i]))
-
-####Broadband plotting
-plt.figure(figsize=(20,10))
-plt.xlabel('Frequencies (GHz)')
-plt.ylabel('Transmittance')
-plt.xscale('log')
-plt.title('Single layer ARC - mean transmission at 30/40GHz')
-quicksingle(porex, 4)
-quicksingle(zitex, 4)
-quicksingle(ro3003, 8)
-quicksingle(ro3006, 5)
-quicksingle(ro3035, 7)
-# quickplot(ro3006, 5, ro3035, 3, porex, 3, 10e9, 400e9)
-# quickplot(ro3006, 4, ro3035, 4, porex, 3, 10e9, 400e9)
-# quickplot(ro3006, 4, ro3035, 3, porex, 3, 10e9, 400e9)
-# quickplot(ro3006, 6, porex, 2, ro3035, 3, 10e9, 400e9)
-# quickplot(ro3006, 3, ro3035, 5, zitex, 3, 10e9, 400e9)
-plt.xlim(10,400)
-plt.axvspan(25.5, 34.5, color='black', alpha=0.1)
-plt.annotate('30', xy=(30,0.5))
-plt.axvspan(34, 46, color='black', alpha=0.2)
-plt.annotate('40', xy=(40,0.5))
-plt.axvspan(95*.85, 95*1.15, color='purple', alpha=0.2)
-plt.annotate('95', xy=(95,0.5))
-plt.axvspan(150*.85, 150*1.15, color='pink', alpha=0.7)
-plt.annotate('150', xy=(150,0.5))
-plt.axvspan(220*.85, 220*1.15, color='green', alpha=0.2)
-plt.annotate('220', xy=(220,0.5))
-plt.axvspan(270*.85, 270*1.15, color='brown', alpha=0.2)
-plt.annotate('270', xy=(270,0.5))
-plt.ylim(0,1)
-plt.legend()
-plt.show()
-
-# #####multimean plotting
-# fig = plt.figure(figsize=(15,10))
-# # ax = fig.gca()
-# # ax.set_xticks(np.arange(0, 130, 1))
-# plt.title('Transmission of multi layer AR coating as function of total amount of layers')
-# plt.ylabel('Mean transmission (%)')
-# plt.xlabel('Amount of physical layers')
-# multimean(ro3035, ro3003, zitex, 4)
-# multimean(ro3035, ro3003, porex, 4)
-# multimean(ro3035, porex, zitex, 4)
-# multimean(ro3003, porex, zitex, 4)
-# multimean(ro3006, ro3035, porex, 4)
-# multimean(ro3006, ro3035, zitex, 4)
-# multimean(ro3006, ro3035, ro3003, 4)
-# multimean(ro3006, ro3003, porex, 4)
-# multimean(ro3006, ro3003, zitex, 4)
-# multimean(ro3006, porex, zitex, 4)
-# # plt.grid()
-# plt.legend()
-# plt.show()
+# #placeholder for annotation function
+# def annotation(file):
+#     for i in arc_stats(ro3006_ro3003_zitex)[2]:
+#         plt.annotate(np.base_repr(i,5), (arc_stats(ro3006_ro3003_zitex)[0][i], arc_stats(ro3006_ro3003_zitex)[1][i]))
