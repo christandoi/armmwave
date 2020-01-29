@@ -23,8 +23,8 @@ import numpy as np
 (here is 10GHz to 400GHz)"""
 frequencies = np.linspace(10, 400, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 30
-transfreqhigh = 40
+transfreqlow = 220
+transfreqhigh = 270
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -38,19 +38,21 @@ ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
-porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
+porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex')
 porex15 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
 porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
 porex29 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*29, desc='Porex')
+porex30 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*30, desc='Porex')
 porex45 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*45, desc='Porex')
 porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='Porex')
+porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
 
 "specify a bonding layer"
-ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=2.54e-5, desc='LDPE')
+ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE')
 bond = ldpe
 
 "specify a substrate"
-alumina_lens = awl.Layer(rind=3.1, tand=9e-4, thick=2e-3, desc='Alumina lens')
+alumina_lens = awl.Layer(rind=3.1, tand=0, thick=mil*0, desc='Alumina lens')
 substrate = alumina_lens
 
 """choose up to 3 materials and the number of layers you want. bonding layers are
@@ -94,7 +96,7 @@ def arc_crunch(mat1, mat2, mat3, layers):
                 print(f'{i} {j} {k}')
     return mat1_mat2_mat3
 
-"""runchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
+"""crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
 note: only crunches for the frequency band you're interested in (e.g. 30/40 or 220/270) that you specify at the top"""
 def crunchNsave(mat1, mat2, mat3, layers=4):
     np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}'), arc_crunch(mat1, mat2, mat3, layers))
