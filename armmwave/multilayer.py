@@ -9,6 +9,7 @@
     -better analysis for extracting less layers out of a bigger layer crunchNsave?
     (change loadmydata to truncate from a fixed file size (6 layers?) to whatever size you need)
     -get annotation working
+    -write function for varying porex thickness
 
 """
 
@@ -17,25 +18,13 @@ import matplotlib.pyplot as plt
 import armmwave.layer as awl
 import armmwave.model as awm
 import numpy as np
-import seaborn as sns
-
-"aesthetics - https://xkcd.com/color/rgb/"
-sns.set()
-sns.set_style("darkgrid")
-sns.set_context("talk")
-sns.set_palette("bright")
-c1 = sns.xkcd_rgb["pale red"]
-c2 = sns.xkcd_rgb["light blue"]
-c3 = sns.xkcd_rgb["aquamarine"]
-c4 = sns.xkcd_rgb["light yellow"]
-c5 = sns.xkcd_rgb["brownish grey"]
 
 """set the broadband frequency range for plotting
 (here is 10GHz to 400GHz)"""
 frequencies = np.linspace(10, 400, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 220
-transfreqhigh = 270
+transfreqlow = 30
+transfreqhigh = 40
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -47,7 +36,14 @@ porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
-porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex8mil') #porex is arbitrary thickness
+
+"porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
+porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
+porex15 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
+porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
+porex29 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*29, desc='Porex')
+porex45 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*45, desc='Porex')
+porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='Porex')
 
 "specify a bonding layer"
 ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=2.54e-5, desc='LDPE')

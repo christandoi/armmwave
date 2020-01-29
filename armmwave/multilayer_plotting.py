@@ -1,28 +1,40 @@
 from multilayer import *
+import seaborn as sns
+
+"aesthetics - https://xkcd.com/color/rgb/"
+sns.set()
+sns.set_style("darkgrid")
+sns.set_context("talk", font_scale=0.75)
+sns.set_palette("bright")
+c1 = sns.xkcd_rgb["pale red"]
+c2 = sns.xkcd_rgb["light blue"]
+c3 = sns.xkcd_rgb["aquamarine"]
+c4 = sns.xkcd_rgb["light yellow"]
+c5 = sns.xkcd_rgb["brownish grey"]
 
 ###Broadband plotting
-plt.figure(figsize=(15,10))
+plt.figure(figsize=(20,10))
 plt.xlabel('Frequencies (GHz)')
 plt.ylabel('Transmittance')
 plt.xscale('log')
-plt.title('Multi layer ARC - mean transmission at 220/270GHz')
+plt.title('Single and Multi-layer ARC - mean transmission at 30/40GHz')
 
-# quicksingle(porex8, 1)
-# quicksingle(zitex, 2)
-# quicksingle(ro3003, 12
-# quicksingle(ro3006, 1)
-# quicksingle(ro3035, 1)
+quicksingle(porex60, 1)
+quicksingle(zitex, 4)
+quicksingle(ro3003, 8)
+quicksingle(ro3006, 5)
+quicksingle(ro3035, 7)
 
-quickplot(ro3035, 1, ro3003, 0, zitex, 0)
-quickplot(ro3035, 1, ro3003, 0, porex, 0)
-quickplot(ro3035, 1, porex, 0, zitex, 0)
-quickplot(ro3003, 1, porex, 0, zitex, 0)
-quickplot(ro3006, 0, ro3035, 1, porex, 0)
-quickplot(ro3006, 0, ro3035, 1, zitex, 0)
-quickplot(ro3006, 0, ro3035, 1, ro3003, 0)
-quickplot(ro3006, 0, ro3003, 1, porex, 0)
-quickplot(ro3006, 2, ro3003, 1, zitex, 2)
-quickplot(ro3006, 2, porex, 2, zitex, 0)
+quickplot(ro3035, 4, ro3003, 3, zitex, 2)
+quickplot(ro3035, 4, ro3003, 3, porex15, 1)
+quickplot(ro3003, 4, porex28, 1, zitex, 1)
+quickplot(ro3035, 4, porex29, 1, zitex, 1)
+quickplot(ro3006, 4, ro3035, 3, porex50, 1)
+quickplot(ro3006, 4, ro3035, 4, zitex, 4)
+quickplot(ro3006, 4, ro3035, 4, ro3003, 4)
+quickplot(ro3006, 4, ro3003, 3, porex45, 1)
+quickplot(ro3006, 4, ro3003, 4, zitex, 3)
+quickplot(ro3006, 4, porex45, 1, zitex, 1)
 
 plt.xlim(10,400)
 plt.axvspan(25.5, 34.5, color='black', alpha=0.1)
