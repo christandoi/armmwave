@@ -1,4 +1,4 @@
-"""CHRIS TANDOI - JANUARY 28, 2020
+"""CHRIS TANDOI - MARCH 2, 2020
     this script is for simulating multiple layers of anti reflective coating
     and also to plot different things based on this data
 
@@ -23,8 +23,8 @@ import numpy as np
 (here is 10GHz to 400GHz)"""
 frequencies = np.linspace(10, 400, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 220
-transfreqhigh = 270
+transfreqlow = 30
+transfreqhigh = 40
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -32,7 +32,8 @@ adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 "define your AR layers"
 mil = 2.54e-5 #converting 1 thousandth of an inch to meters
 zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
-porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
+pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15')
+porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J')
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
@@ -44,7 +45,7 @@ porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
 porex29 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*29, desc='Porex')
 porex30 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*30, desc='Porex')
 porex45 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*45, desc='Porex')
-porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='Porex')
+porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='PM23J')
 porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
 
 "specify a bonding layer"
@@ -52,7 +53,7 @@ ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE')
 bond = ldpe
 
 "specify a substrate"
-alumina_lens = awl.Layer(rind=3.1, tand=0, thick=mil*0, desc='Alumina lens')
+alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina lens')
 substrate = alumina_lens
 
 """choose up to 3 materials and the number of layers you want. bonding layers are
