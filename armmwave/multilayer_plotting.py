@@ -17,7 +17,7 @@ c5 = sns.xkcd_rgb["brownish grey"]
 # plt.xlabel('Frequencies (GHz)')
 # plt.ylabel('Transmittance')
 # plt.xscale('log')
-# plt.title(f'Multi-layer ARC Porex comparison - mean transmission at {transfreqlow}}/{transfreqhigh} GHz (0-loss alumina)')
+# plt.title(f'Multi-layer ARC Porex comparison - mean transmission at {transfreqlow}/{transfreqhigh} GHz (0-loss alumina)')
 
 # #single layer plotting
 # quicksingle(porex8, 1)
@@ -59,7 +59,7 @@ c5 = sns.xkcd_rgb["brownish grey"]
 
 ####multimean plotting (to figure out what to plot in quickplot)
 fig = plt.figure(figsize=(15,10))
-plt.title(f'Transmission of multi layer AR coating as function of total amount of layers at {transfreqlow}}/{transfreqhigh} GHz (0-loss alumina)')
+plt.title(f'Transmission of multi layer AR coating as function of total amount of layers at {transfreqlow}/{transfreqhigh} GHz (0-loss alumina)')
 plt.ylabel('Mean transmission (%)')
 plt.xlabel('Amount of physical layers')
 multimean(ro3003, pmr15, zitex, 4)
