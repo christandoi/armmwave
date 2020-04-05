@@ -39,7 +39,7 @@ pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.
 #porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') note: discontinued? (too expensive for custom?)
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
-rod5880 = awl.Layer(rind=2.00, tand=0.0021, thick=mil*10, desc='5800LZ')
+rod5880 = awl.Layer(rind=2.00, tand=0.0021, thick=mil*10, desc='5880LZ')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
