@@ -1,6 +1,6 @@
-"""CHRIS TANDOI - MARCH 2, 2020
+"""CHRIS TANDOI - APRIL 5, 2020
     this script is for simulating multiple layers of anti reflective coating
-    and also to plot different things based on this data
+    and also to plot different things based on this data (multilayer_plotting.py)
 
     TO DO: 
     -consolidate arc and arcsingle into one function that is dynamic in how many
@@ -10,6 +10,9 @@
     (change loadmydata to truncate from a fixed file size (6 layers?) to whatever size you need)
     -get annotation working
     -write function for varying porex thickness
+    -more crunchNsave: pass low/high frequencies so i can crunchnsave different frequencies at once
+    -is multimean good? it's only showing the highest transmission, what if there's a lower
+        transmission (0.1%) but much thinner (5 layers?)
 
 """
 
@@ -23,8 +26,8 @@ import numpy as np
 (here is 10GHz to 400GHz)"""
 frequencies = np.linspace(10, 400, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 30
-transfreqhigh = 40
+transfreqlow = 220
+transfreqhigh = 270
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -32,10 +35,11 @@ adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 "define your AR layers"
 mil = 2.54e-5 #converting 1 thousandth of an inch to meters
 zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
-pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15')
-porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J')
+pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm
+#porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') note: discontinued? (too expensive for custom?)
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
+rod5880 = awl.Layer(rind=2.00, tand=0.0021, thick=mil*10, desc='5800LZ')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
@@ -144,8 +148,8 @@ def quicksingle(mat, amount, freqlow=10e9, freqhigh=400e9, ls='-'):
 
 """for plotting the maximum mean transmission value for each combination of layers
 i.e.: best transmission at 1 layer of material, 2 layers, 3 layers, 4, 5, 6, etc."""
-def multimean(mat1, mat2, mat3, layers):
-    file = loadmydata(mat1, mat2, mat3, layers)
+def multimean(mat1, mat2, mat3, layers=4):
+    file = loadmydata(mat1, mat2, mat3, layers=4)
     mean = arc_stats(file)[1]
     location = arc_stats(file)[2]
     base5loc = []
