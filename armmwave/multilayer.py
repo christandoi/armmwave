@@ -26,8 +26,8 @@ import numpy as np
 (here is 10GHz to 400GHz)"""
 frequencies = np.linspace(10, 400, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 220
-transfreqhigh = 270
+transfreqlow = 30
+transfreqhigh = 40
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -37,9 +37,9 @@ mil = 2.54e-5 #converting 1 thousandth of an inch to meters
 zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
 pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm
 #porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') note: discontinued? (too expensive for custom?)
+rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ')
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
-rod5880 = awl.Layer(rind=2.00, tand=0.0021, thick=mil*10, desc='5880LZ')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
@@ -163,7 +163,7 @@ def multimean(mat1, mat2, mat3, layers=4):
     # total_layers_dict = dict(zip(mean, total_layers))
     max_pos = mean.index(max(mean))
     label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[max_pos]}'
-    plotting = plt.scatter(total_layers[max_pos], mean[max_pos], label=label, alpha=0.5)
+    plotting = plt.scatter(total_layers[max_pos], mean[max_pos], label=label, alpha=1)
     return plotting
 
 "placeholder for annotation function"
