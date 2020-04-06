@@ -5,7 +5,6 @@
     TO DO: 
     -consolidate arc and arcsingle into one function that is dynamic in how many
         layers you can choose (and subsequently quickplot/quicksingle)
-    -clean up plotting (multimean is a mess right now)
     -better analysis for extracting less layers out of a bigger layer crunchNsave?
     (change loadmydata to truncate from a fixed file size (6 layers?) to whatever size you need)
     -get annotation working
@@ -72,7 +71,7 @@ bonding layer <--amountoflayers1
 also choose an upper and lower bound for frequencies"""
 
 "arc is for choosing a single configuration"
-def arc(material1, amountoflayers1, material2, amountoflayers2, material3, amountoflayers3, freqlow, freqhigh):
+def arc(material1, material2, material3, amountoflayers1, amountoflayers2, amountoflayers3, freqlow, freqhigh):
     layers = [awl.Source(),]
     for i in range(amountoflayers3):
         layers.append(material3)
@@ -97,7 +96,7 @@ def arc_crunch(mat1, mat2, mat3, layers):
     for i in range(layers+1):
         for j in range(layers+1):
             for k in range(layers+1):
-                mat1_mat2_mat3.append(arc(mat1, i, mat2, j, mat3, k, adjtransfreqlow, adjtransfreqhigh)['transmittance'])
+                mat1_mat2_mat3.append(arc(mat1, mat2, mat3, i, j, k, adjtransfreqlow, adjtransfreqhigh)['transmittance'])
                 print(f'{i} {j} {k}')
     return mat1_mat2_mat3
 
@@ -118,9 +117,9 @@ def arc_stats(crunched_model):
     return stddev, mean, location
 
 "plotting function to include label"
-def quickplot(mat1, amount1, mat2, amount2, mat3, amount3, freqlow=10e9, freqhigh=400e9, ls='-'):
-    broadband = arc(mat1, amount1, mat2, amount2, mat3, amount3, freqlow, freqhigh)['transmittance']
-    crunchrange = arc(mat1, amount1, mat2, amount2, mat3, amount3, adjtransfreqlow, adjtransfreqhigh)['transmittance']
+def quickplot(mat1, mat2, mat3, amount1, amount2, amount3, freqlow=10e9, freqhigh=400e9, ls='-'):
+    broadband = arc(mat1, mat2, mat3, amount1, amount2, amount3, freqlow, freqhigh)['transmittance']
+    crunchrange = arc(mat1, mat2, mat3, amount1, amount2, amount3, adjtransfreqlow, adjtransfreqhigh)['transmittance']
     label = f'{round(amount1 * mat1.thick * 39370)}mil {mat1.desc}, {round(amount2 * mat2.thick * 39370)}mil {mat2.desc}, {round(amount3 * mat3.thick * 39370)}mil {mat3.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
     return plt.plot(frequencies, broadband, label=label, linestyle=ls)
 
