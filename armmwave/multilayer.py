@@ -12,6 +12,9 @@
     -more crunchNsave: pass low/high frequencies so i can crunchnsave different frequencies at once
     -is multimean good? it's only showing the highest transmission, what if there's a lower
         transmission (0.1%) but much thinner (5 layers?)
+    -probably unnecessary: change crunching to choose your range of layers. thought came up because 
+        what if you already crunched 4 layers of some recipe but want to find out the 5th, 6th layers etc.
+        without redoing the first 4?
 
 """
 
@@ -23,10 +26,10 @@ import numpy as np
 
 """set the broadband frequency range for plotting
 (here is 10GHz to 400GHz)"""
-frequencies = np.linspace(10, 400, 1000)
+frequencies = np.linspace(10, 1000, 1000)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 30
-transfreqhigh = 40
+transfreqlow = 850
+transfreqhigh = 850
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -35,13 +38,13 @@ adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 mil = 2.54e-5 #converting 1 thousandth of an inch to meters
 zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
 pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm
-#porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') note: discontinued? (too expensive for custom?)
 rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ')
 ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
 ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
 ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
+porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') #note: discontinued? (too expensive for custom?)
 porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex')
 porex15 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
 porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
@@ -53,11 +56,15 @@ porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
 
 "specify a bonding layer"
 ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE')
+
 bond = ldpe
 
 "specify a substrate"
 alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina lens')
-substrate = alumina_lens
+silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon')
+silicon1.5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon')
+
+substrate = silicon300k
 
 """choose up to 3 materials and the number of layers you want. bonding layers are
 automatically included along with the [bookkeeping layers] and <substrate>. visualization:
@@ -163,6 +170,27 @@ def multimean(mat1, mat2, mat3, layers=4):
     max_pos = mean.index(max(mean))
     label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[max_pos]}'
     plotting = plt.scatter(total_layers[max_pos], mean[max_pos], label=label, alpha=1)
+    return plotting
+
+"""for plotting every mean value for each layer combination of a specific recipe"""
+def all_layers_mean(mat1, mat2, mat3, layers=4):
+    file = loadmydata(mat1, mat2, mat3, layers=4)
+    mean = arc_stats(file)[1]
+    location = arc_stats(file)[2]
+    base5loc = []
+    "convert location to base 5 (or however many layers you choose, just adjust) for actual amount of layer values"
+    for place in location:
+        base5loc.append(np.base_repr(place,5))
+    "add up each amount layers (i.e. 304 = 3 + 0 + 4 = 7)"
+    total_layers = []
+    for amountoflayers in base5loc:
+        total_layers.append(sum(int(x) for x in amountoflayers))
+    ### need to annotate each individual point?
+    # labels = []
+    # for configuration in range(len(mean)):
+    #     labels.append(f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[configuration]}')
+    label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}'
+    plotting = plt.scatter(total_layers, mean, label=label, alpha=1)
     return plotting
 
 "placeholder for annotation function"
