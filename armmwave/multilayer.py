@@ -24,8 +24,7 @@ import armmwave.layer as awl
 import armmwave.model as awm
 import numpy as np
 
-"""set the broadband frequency range for plotting
-(here is 10GHz to 400GHz)"""
+"set the broadband frequency range for plotting, GHz"
 frequencies = np.linspace(10, 1000, 1000)
 "and the frequency range in GHz we're interested in transmission for"
 transfreqlow = 850
@@ -110,11 +109,11 @@ def arc_crunch(mat1, mat2, mat3, layers):
 """crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
 note: only crunches for the frequency band you're interested in (e.g. 30/40 or 220/270) that you specify at the top"""
 def crunchNsave(mat1, mat2, mat3, layers=4):
-    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}'), arc_crunch(mat1, mat2, mat3, layers))
+    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}_{substrate.desc}'), arc_crunch(mat1, mat2, mat3, layers))
 
 "inverse of crunchNsave: loads your saved crunch to a variable that you can call for analysis later"
 def loadmydata(mat1, mat2, mat3, layers=4):
-    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}.npy')))
+    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}_{substrate.desc}.npy')))
 
 "statistics setup for analysis"
 def arc_stats(crunched_model):
