@@ -26,7 +26,7 @@ import numpy as np
 
 "set the broadband frequency range for plotting, GHz"
 startfreq = 100
-stopfreq = 2000
+stopfreq = 1200
 steps = 2000
 frequencies = np.linspace(startfreq, stopfreq, steps)
 "and the frequency range in GHz we're interested in transmission for"
@@ -69,9 +69,9 @@ ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE')
 bond = ldpe
 
 "specify a substrate"
-alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina lens')
+alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina')
 silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon, 300K')
-silicon1p5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon, 1.5K')
+silicon1p5k = awl.Layer(rind=3.3818, tand=0, thick=0.01, desc='Silicon, 1.5K')
 
 substrate = silicon1p5k
 
@@ -133,7 +133,7 @@ def arc_stats(crunched_model):
     return stddev, mean, location
 
 "plotting function to include label"
-def quickplot(mat1, mat2, mat3, amount1, amount2, amount3, freqlow=10e9, freqhigh=400e9, ls='-'):
+def quickplot(mat1, mat2, mat3, amount1, amount2, amount3, freqlow=startfreq*10**9, freqhigh=stopfreq*10**9, ls='-'):
     broadband = arc(mat1, mat2, mat3, amount1, amount2, amount3, freqlow, freqhigh)['transmittance']
     crunchrange = arc(mat1, mat2, mat3, amount1, amount2, amount3, adjtransfreqlow, adjtransfreqhigh)['transmittance']
     label = f'{round(amount1 * mat1.thick * 39370)}mil {mat1.desc}, {round(amount2 * mat2.thick * 39370)}mil {mat2.desc}, {round(amount3 * mat3.thick * 39370)}mil {mat3.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
@@ -153,9 +153,9 @@ def arcsingle(material, amountoflayers, freqlow, freqhigh):
     return model.run()
 
 """plotting for arcsingle
-broadband is for the overall picture (here: 10 to 400GHz)
-crunchrange is the specific brand we care about (here: 30/40GHz)"""
-def quicksingle(mat, amount, freqlow=10e9, freqhigh=400e9, ls='-'):
+broadband is for the overall picture
+crunchrange is the specific brand we care about"""
+def quicksingle(mat, amount, freqlow=startfreq*10**9, freqhigh=stopfreq*10**9, ls='-'):
     broadband = arcsingle(mat, amount, freqlow, freqhigh)['transmittance']
     crunchrange = arcsingle(mat, amount, adjtransfreqlow, adjtransfreqhigh)['transmittance']
     label = f'{round(amount * mat.thick * 39370)}mil {mat.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
