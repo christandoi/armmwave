@@ -25,10 +25,20 @@ import armmwave.model as awm
 import numpy as np
 
 "set the broadband frequency range for plotting, GHz"
-frequencies = np.linspace(10, 1000, 1000)
+startfreq = 100
+stopfreq = 2000
+steps = 2000
+frequencies = np.linspace(startfreq, stopfreq, steps)
 "and the frequency range in GHz we're interested in transmission for"
 transfreqlow = 850
 transfreqhigh = 850
+
+#for plotting purposes
+if transfreqlow == transfreqhigh:
+    transdesc = f'{transfreqlow}'
+else:
+    transdesc = f'{transfreqlow}/{transfreqhigh}'
+
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
@@ -60,10 +70,10 @@ bond = ldpe
 
 "specify a substrate"
 alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina lens')
-silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon')
-silicon1.5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon')
+silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon, 300K')
+silicon1p5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon, 1.5K')
 
-substrate = silicon300k
+substrate = silicon1p5k
 
 """choose up to 3 materials and the number of layers you want. bonding layers are
 automatically included along with the [bookkeeping layers] and <substrate>. visualization:
@@ -91,7 +101,7 @@ def arc(material1, material2, material3, amountoflayers1, amountoflayers2, amoun
     layers.append(substrate)
     layers.append(awl.Terminator(vac=False))
     model = awm.Model()
-    model.set_freq_range(freq1=freqlow, freq2=freqhigh)
+    model.set_freq_range(freq1=freqlow, freq2=freqhigh, nsample=steps)
     model.set_up(layers)
     return model.run()
 
@@ -109,11 +119,11 @@ def arc_crunch(mat1, mat2, mat3, layers):
 """crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
 note: only crunches for the frequency band you're interested in (e.g. 30/40 or 220/270) that you specify at the top"""
 def crunchNsave(mat1, mat2, mat3, layers=4):
-    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}_{substrate.desc}'), arc_crunch(mat1, mat2, mat3, layers))
+    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{substrate.thick}'), arc_crunch(mat1, mat2, mat3, layers))
 
 "inverse of crunchNsave: loads your saved crunch to a variable that you can call for analysis later"
 def loadmydata(mat1, mat2, mat3, layers=4):
-    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{int(transfreqlow)}_{int(transfreqhigh)}_{substrate.desc}.npy')))
+    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{substrate.thick}.npy')))
 
 "statistics setup for analysis"
 def arc_stats(crunched_model):
@@ -138,7 +148,7 @@ def arcsingle(material, amountoflayers, freqlow, freqhigh):
     layers.append(substrate)
     layers.append(awl.Terminator(vac=False))
     model = awm.Model()
-    model.set_freq_range(freq1=freqlow, freq2=freqhigh)
+    model.set_freq_range(freq1=freqlow, freq2=freqhigh, nsample=steps)
     model.set_up(layers)
     return model.run()
 
