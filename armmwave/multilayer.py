@@ -26,7 +26,7 @@ import numpy as np
 
 "set the broadband frequency range for plotting, GHz"
 startfreq = 100
-stopfreq = 1200
+stopfreq = 2000
 steps = 2000
 frequencies = np.linspace(startfreq, stopfreq, steps)
 "and the frequency range in GHz we're interested in transmission for"
@@ -37,7 +37,7 @@ transfreqhigh = 850
 if transfreqlow == transfreqhigh:
     transdesc = f'{transfreqlow}'
 else:
-    transdesc = f'{transfreqlow}/{transfreqhigh}'
+    transdesc = f'{transfreqlow}-{transfreqhigh}'
 
 "don't change these below. accounts for the +/- 15% range in wavelengths and converts Hz to GHz"
 adjtransfreqlow = transfreqlow*(10**9)*.85
@@ -45,12 +45,12 @@ adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 
 "define your AR layers"
 mil = 2.54e-5 #converting 1 thousandth of an inch to meters
-zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex')
-pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm
-rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ')
-ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003')
-ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035')
-ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006')
+zitex = awl.Layer(rind=1.2, tand=9e-4, thick=mil*15, desc='Zitex') #9e-4
+pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm #9e-4
+rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ') #0.0021
+ro3003 = awl.Layer(rind=1.732, tand=0.001, thick=mil*5, desc='RO3003') #0.001
+ro3035 = awl.Layer(rind=1.897, tand=0.0015, thick=mil*5, desc='RO3035') #0.0015
+ro3006 = awl.Layer(rind=2.549, tand=0.002, thick=mil*5, desc='RO3006') #0.002
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
 porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') #note: discontinued? (too expensive for custom?)
@@ -64,14 +64,14 @@ porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='PM23J')
 porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
 
 "specify a bonding layer"
-ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE')
+ldpe = awl.Layer(rind=1.5141, tand=2.7e-4, thick=mil*1, desc='LDPE') #2.7e-4
 
 bond = ldpe
 
 "specify a substrate"
-alumina_lens = awl.Layer(rind=3.1, tand=1e-3, thick=mil*0, desc='Alumina')
+alumina_lens = awl.Layer(rind=3.130, tand=0, thick=mil*500, desc='Alumina') #1e-3
 silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon, 300K')
-silicon1p5k = awl.Layer(rind=3.3818, tand=0, thick=0.01, desc='Silicon, 1.5K')
+silicon1p5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon, 1.5K') #1.6e-4
 
 substrate = silicon1p5k
 
@@ -158,7 +158,7 @@ crunchrange is the specific brand we care about"""
 def quicksingle(mat, amount, freqlow=startfreq*10**9, freqhigh=stopfreq*10**9, ls='-'):
     broadband = arcsingle(mat, amount, freqlow, freqhigh)['transmittance']
     crunchrange = arcsingle(mat, amount, adjtransfreqlow, adjtransfreqhigh)['transmittance']
-    label = f'{round(amount * mat.thick * 39370)}mil {mat.desc}, {round(np.mean(crunchrange)*100, 2)}% transmission'
+    label = f'{round(amount * mat.thick * 39370)}mil {mat.desc}, {round(mat.tand,4)} loss tan, {round(np.mean(crunchrange)*100, 2)}% transmission'
     return plt.plot(frequencies, broadband, label=label, linestyle=ls)
 
 """for plotting the maximum mean transmission value for each combination of layers
