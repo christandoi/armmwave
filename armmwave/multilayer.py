@@ -24,14 +24,16 @@ import armmwave.layer as awl
 import armmwave.model as awm
 import numpy as np
 
+mil = 2.54e-5 #converting 1 thousandth of an inch to meters
+
 "set the broadband frequency range for plotting, GHz"
 startfreq = 10
 stopfreq = 1000
 steps = 2000
 frequencies = np.linspace(startfreq, stopfreq, steps)
 "and the frequency range in GHz we're interested in transmission for"
-transfreqlow = 220
-transfreqhigh = 270
+transfreqlow = 30
+transfreqhigh = 40
 
 #for plotting purposes
 if transfreqlow == transfreqhigh:
@@ -44,36 +46,37 @@ adjtransfreqlow = transfreqlow*(10**9)*.85
 adjtransfreqhigh = transfreqhigh*(10**9)*1.15
 
 "define your AR layers"
-mil = 2.54e-5 #converting 1 thousandth of an inch to meters
-zitex = awl.Layer(rind=1.2, tand=0, thick=mil*15, desc='Zitex') #9e-4
-pmr15 = awl.Layer(rind=1.304, tand=9e-4, thick=mil*59, desc='PMR15') #59mil = 1.5mm #9e-4
-rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ') #0.0021
-ro3003 = awl.Layer(rind=1.732, tand=0, thick=mil*5, desc='RO3003') #0.001
-ro3035 = awl.Layer(rind=1.897, tand=0, thick=mil*5, desc='RO3035') #0.0015
-ro3006 = awl.Layer(rind=2.549, tand=0, thick=mil*5, desc='RO3006') #0.002
+zitex = awl.Layer(rind=1.234, tand=0, thick=mil*15, desc='Zitex') #9e-5 nadolski 2020 (150 GHz, 300K)
+pmr15 = awl.Layer(rind=1.304, tand=0, thick=mil*59, desc='PMR15') #59mil = 1.5mm from tech sheet, loss tan ?? 9e-4?
+# rod5880 = awl.Layer(rind=1.414, tand=0.0021, thick=mil*10, desc='5880LZ') #0.0021
+ro3003 = awl.Layer(rind=1.732, tand=0, thick=mil*5, desc='RO3003') #0.001 rogers website (10GHz, 296.15K)
+ro3035 = awl.Layer(rind=1.679, tand=0, thick=mil*5, desc='RO3035') #4.3e-3 nadolski 2020 (150 GHz, 300K)
+ro3006 = awl.Layer(rind=2.249, tand=0, thick=mil*5, desc='RO3006') #9.7e-3 nadolski 2020 (150 GHz, 300K)
+ro3010 = awl.Layer(rind=sqrt(10.2), tand=0, thick=mil*5, desc='RO3010') #0.0022 #rogers website (10 GHz, 300K)
 
 "porex can be made in arbitrary thicknesses, so this is a garbage placeholder until i write a function to vary it"
-porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') #note: discontinued? (too expensive for custom?)
-porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex')
-porex15 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
-porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
-porex29 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*29, desc='Porex')
-porex30 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*30, desc='Porex')
-porex45 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*45, desc='Porex')
-porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='PM23J')
-porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
+# porex = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='PM23J') #note: discontinued? (too expensive for custom?)
+# porex8 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*8, desc='Porex')
+# porex15 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*15, desc='Porex')
+# porex28 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*28, desc='Porex')
+# porex29 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*29, desc='Porex')
+# porex30 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*30, desc='Porex')
+# porex45 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*45, desc='Porex')
+# porex50 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*50, desc='PM23J')
+# porex60 = awl.Layer(rind=1.319, tand=9e-4, thick=mil*60, desc='Porex')
 
 "specify a bonding layer"
-ldpe = awl.Layer(rind=1.5141, tand=0, thick=mil*1, desc='LDPE') #2.7e-4
+ldpe = awl.Layer(rind=1.5141, tand=0, thick=mil*1, desc='LDPE') #2.8e-4, lamb: 300GHz, 290K
 
 bond = ldpe
 
 "specify a substrate"
-alumina_lens = awl.Layer(rind=3.130, tand=0, thick=mil*500, desc='Alumina') #1e-3
+a479u = awl.Layer(rind=np.sqrt(10), tand=0, thick=mil*500, desc='A479U')#9e-5
+alumina_lens = awl.Layer(rind=3.130, tand=0, thick=mil*500, desc='Alumina') #1e-3 andy alumina
 silicon300k = awl.Layer(rind=3.4155, tand=6e-4, thick=0.01, desc='Silicon, 300K')
-silicon1p5k = awl.Layer(rind=3.3818, tand=0, thick=0.01, desc='Silicon, 1.5K') #1.6e-4
+silicon1p5k = awl.Layer(rind=3.3818, tand=1.6e-4, thick=0.01, desc='Silicon, 1.5K') #1.6e-4
 
-substrate = alumina_lens
+substrate = a479u
 
 """choose up to 3 materials and the number of layers you want. bonding layers are
 automatically included along with the [bookkeeping layers] and <substrate>. visualization:
@@ -119,11 +122,11 @@ def arc_crunch(mat1, mat2, mat3, layers):
 """crunchNsave will save your crunch to file (in /data/ directory) so you don't have to crunch more than once
 note: only crunches for the frequency band you're interested in (e.g. 30/40 or 220/270) that you specify at the top"""
 def crunchNsave(mat1, mat2, mat3, layers=4):
-    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{substrate.thick}'), arc_crunch(mat1, mat2, mat3, layers))
+    np.save(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{round(substrate.thick,6)}'), arc_crunch(mat1, mat2, mat3, layers))
 
 "inverse of crunchNsave: loads your saved crunch to a variable that you can call for analysis later"
 def loadmydata(mat1, mat2, mat3, layers=4):
-    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{substrate.thick}.npy')))
+    return np.load(os.path.normpath(os.path.join('data', f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{layers}_{transfreqlow}_{transfreqhigh}_{substrate.desc}_{substrate.tand}_{round(substrate.thick,5)}.npy')))
 
 "statistics setup for analysis"
 def arc_stats(crunched_model):
@@ -178,6 +181,7 @@ def multimean(mat1, mat2, mat3, layers=4):
     # total_layers_dict = dict(zip(mean, total_layers))
     max_pos = mean.index(max(mean))
     label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[max_pos]}'
+    print(label,total_layers[max_pos], mean[max_pos])
     plotting = plt.scatter(total_layers[max_pos], mean[max_pos], label=label, alpha=1)
     return plotting
 
@@ -199,6 +203,7 @@ def all_layers_mean(mat1, mat2, mat3, layers=4):
     # for configuration in range(len(mean)):
     #     labels.append(f'{mat1.desc}_{mat2.desc}_{mat3.desc}_{base5loc[configuration]}')
     label = f'{mat1.desc}_{mat2.desc}_{mat3.desc}'
+    plt.title(f'{label}')
     plotting = plt.scatter(total_layers, mean, label=label, alpha=1)
     return plotting
 
